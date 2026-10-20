@@ -1,0 +1,172 @@
+---
+// Hero：定位 + 安装命令框 + 开发↔游玩星球（3D 岛，失败时保留静态星球与徽章列表）
+import InstallBox from '../InstallBox.astro';
+import StaticPlanet from './StaticPlanet.astro';
+import Planet from './Planet';
+import { capabilities } from '../../data/capabilities';
+
+const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'v0.5.4'];
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <!-- 3D 画布铺满整个 Hero（全宽），星球通过相机偏移对齐右侧舞台 -->
+  <div class="hero-bg">
+    <Planet client:only="react" capabilities={capabilities} />
+  </div>
+  <div class="hero-copy">
+    <p class="eyebrow pixel">&gt;_ 我的世界中国版 · 命令行开发工具</p>
+    <h1 id="hero-title" class="pixel">
+      从<span class="dev">代码</span>到<span class="play">世界</span>，<br />只隔一条命令
+    </h1>
+    <p class="lead">
+      用 Python 标准项目与依赖管理方式开发《我的世界》中国版 Mod 和资源包。依赖、构建、打包、进游戏测试都是一条命令，AI
+      Agent 也能自己搭环境、跑游戏、操作和截图验收。
+    </p>
+    <InstallBox />
+    <div class="links">
+      <a class="btn primary pixel" href="#start">交给 AI</a>
+      <a class="btn pixel" href="https://github.com/EaseCation/mcpywrap">GitHub</a>
+      <a class="btn pixel" href="/wiki/">阅读 Wiki</a>
+    </div>
+    <ul class="tags" aria-label="支持平台与版本">
+      {tags.map((t) => <li class="pixel">{t}</li>)}
+    </ul>
+  </div>
+
+  <div class="hero-stage">
+    <div class="planet-wrap" data-planet-wrap>
+      <StaticPlanet />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: clamp(24px, 4vw, 56px);
+    align-items: center;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: clamp(32px, 6vw, 72px) clamp(16px, 4vw, 48px) 48px;
+    min-height: calc(100vh - 72px);
+  }
+  .hero-bg {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+    z-index: 0;
+  }
+  .hero-copy,
+  .hero-stage {
+    position: relative;
+    z-index: 1;
+  }
+  /* 舞台只用来占位和对齐，事件交给下面的画布 */
+  .hero-stage {
+    pointer-events: none;
+  }
+  .eyebrow {
+    margin: 0 0 16px;
+    font-size: var(--px-12);
+    color: var(--c-acid);
+    letter-spacing: 1px;
+  }
+  h1 {
+    margin: 0 0 20px;
+    font-size: var(--px-48);
+    line-height: 1.25;
+    color: var(--c-prompt);
+    font-weight: normal;
+  }
+  h1 .dev {
+    color: var(--c-mint);
+  }
+  h1 .play {
+    color: var(--c-warm);
+  }
+  .lead {
+    margin: 0 0 28px;
+    max-width: 34em;
+    color: var(--c-text);
+    font-size: 17px;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0 24px;
+  }
+  .btn {
+    font-size: var(--px-12);
+    padding: 10px 16px 8px;
+    color: var(--c-text);
+    background: var(--c-bg-2);
+    box-shadow: var(--bevel);
+    text-decoration: none;
+  }
+  .btn:hover {
+    color: var(--c-acid);
+  }
+  .btn.primary {
+    background: var(--c-mint);
+    color: var(--c-void);
+  }
+  .btn.primary:hover {
+    background: var(--c-acid);
+    color: var(--c-void);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .tags li {
+    font-size: var(--px-12);
+    padding: 4px 8px 2px;
+    border: 2px solid var(--c-line);
+    color: var(--c-text-dim);
+  }
+
+  .hero-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+  .planet-wrap {
+    position: relative;
+    aspect-ratio: 1;
+    width: 100%;
+    max-height: 78vh;
+    margin: 0 auto;
+  }
+  @media (max-width: 960px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
+    }
+    .hero-stage {
+      order: -1;
+    }
+    .planet-wrap {
+      max-width: 520px;
+    }
+    h1 {
+      font-size: var(--px-36);
+    }
+  }
+  @media (max-width: 480px) {
+    h1 {
+      font-size: var(--px-24);
+      line-height: 1.5;
+    }
+  }
+</style>

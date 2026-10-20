@@ -1,0 +1,79 @@
+---
+// 首页区块外壳：编号 + 像素标题 + 导语
+interface Props {
+  id: string;
+  index: string;
+  kicker: string;
+  title: string;
+  tone?: 'dev' | 'seam' | 'play';
+}
+const { id, index, kicker, title, tone = 'dev' } = Astro.props;
+---
+
+<section class={`sec ${tone}`} id={id} aria-labelledby={`${id}-title`}>
+  <header class="sec-head">
+    <p class="kicker pixel"><span>{index}</span> {kicker}</p>
+    <h2 id={`${id}-title`} class="pixel">{title}</h2>
+    <div class="lead"><slot name="lead" /></div>
+  </header>
+  <slot />
+</section>
+
+<style>
+  .sec {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(56px, 9vw, 112px) clamp(16px, 4vw, 48px) 0;
+    scroll-margin-top: 72px;
+  }
+  .sec-head {
+    max-width: 760px;
+    margin-bottom: 32px;
+  }
+  .kicker {
+    margin: 0 0 12px;
+    font-size: var(--px-12);
+    color: var(--c-mint);
+  }
+  .kicker span {
+    padding: 2px 6px 0;
+    margin-right: 6px;
+    color: var(--c-void);
+    background: var(--c-mint);
+  }
+  .seam .kicker {
+    color: var(--c-acid);
+  }
+  .seam .kicker span {
+    background: var(--c-acid);
+  }
+  .play .kicker {
+    color: var(--c-warm);
+  }
+  .play .kicker span {
+    background: var(--c-warm);
+  }
+  h2 {
+    margin: 0 0 16px;
+    font-size: var(--px-36);
+    line-height: 1.33;
+    font-weight: normal;
+    color: var(--c-prompt);
+  }
+  .lead :global(p) {
+    margin: 0 0 8px;
+    color: var(--c-text);
+    font-size: 16px;
+  }
+  .lead :global(code) {
+    font-family: var(--f-code);
+    font-size: 14px;
+    color: var(--c-mint);
+  }
+  @media (max-width: 480px) {
+    h2 {
+      font-size: var(--px-24);
+      line-height: 1.5;
+    }
+  }
+</style>

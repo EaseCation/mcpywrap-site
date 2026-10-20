@@ -1,0 +1,8 @@
+---
+// 品牌只有深色主题：固定 data-theme="dark"，不读取系统偏好
+---
+
+<script is:inline>
+	document.documentElement.dataset.theme = 'dark';
+	window.StarlightThemeProvider = { updatePickers() {} };
+</script>

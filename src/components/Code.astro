@@ -1,0 +1,100 @@
+---
+// 静态代码片段：轻量着色（注释 / 表头 / 键 / 字符串），可选复制
+interface Props {
+  code: string;
+  lang?: 'toml' | 'sh' | 'text';
+  title?: string;
+  copy?: boolean;
+}
+const { code, lang = 'text', title, copy = false } = Astro.props;
+const id = `code-${Math.abs([...code].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)).toString(36)}`;
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const paint = (line: string) => {
+  const e = esc(line);
+  if (lang === 'toml') {
+    if (/^\s*#/.test(line)) return `<span class="c">${e}</span>`;
+    if (/^\s*\[/.test(line)) return `<span class="h">${e}</span>`;
+    const m = line.match(/^(\s*[\w.-]+)(\s*=\s*)(.*)$/);
+    if (!m) return e;
+    const val = esc(m[3]).replace(/"([^"]*)"/g, '<span class="s">"$1"</span>');
+    return `<span class="k">${esc(m[1])}</span>${esc(m[2])}${val}`;
+  }
+  if (lang === 'sh') {
+    if (/^\s*#/.test(line)) return `<span class="c">${e}</span>`;
+    return e.replace(/^(\s*)(mcpy|uv|pip)\b/, '$1<span class="p">$ </span><span class="k">$2</span>');
+  }
+  return e;
+};
+const html = code.trim().split('\n').map(paint).join('\n');
+---
+
+<figure class="code">
+  {
+    (title || copy) && (
+      <figcaption class="pixel">
+        <span>{title}</span>
+        {copy && (
+          <button class="copy pixel" type="button" data-copy={code.trim()} data-copy-target={id} aria-label={`复制${title ?? '代码'}`}>
+            <span data-copy-label>复制</span>
+          </button>
+        )}
+      </figcaption>
+    )
+  }
+  <pre id={id} tabindex="0"><code set:html={html} /></pre>
+</figure>
+
+{copy && <script>import { bindCopy } from '../scripts/copy'; bindCopy();</script>}
+
+<style>
+  .code {
+    margin: 0;
+    background: var(--c-void);
+    box-shadow: var(--bevel), 0 0 0 2px var(--c-line);
+    min-width: 0;
+  }
+  figcaption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px 4px 12px;
+    background: var(--c-bg-2);
+    font-size: var(--px-12);
+    color: var(--c-text-dim);
+  }
+  .copy {
+    font-size: var(--px-12);
+    padding: 4px 8px 2px;
+    border: 0;
+    background: var(--c-teal);
+    color: var(--c-void);
+    cursor: pointer;
+  }
+  .copy[data-state='done'] {
+    background: var(--c-acid);
+  }
+  pre {
+    margin: 0;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font: 13px/1.7 var(--f-code);
+    color: var(--c-text);
+  }
+  pre :global(.c) {
+    color: #5b7385;
+  }
+  pre :global(.h) {
+    color: var(--c-warm);
+  }
+  pre :global(.k) {
+    color: var(--c-mint);
+  }
+  pre :global(.s) {
+    color: var(--c-acid);
+  }
+  pre :global(.p) {
+    color: var(--c-acid);
+    user-select: none;
+  }
+</style>

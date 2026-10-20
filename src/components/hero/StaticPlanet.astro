@@ -1,0 +1,75 @@
+---
+// 静态星球（构建时生成 SVG）：3D 加载前、WebGL 不可用时显示。
+// 左半开发态（深蓝方块 + 薄荷描边），右半游玩态（草地实心），中间 S 形发光交界线。
+const N = 17;
+const cells: { x: number; y: number; kind: 'dev' | 'play' | 'seam'; shade: number }[] = [];
+const hash = (x: number, y: number) => {
+  let h = (x * 374761393 + y * 668265263) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+};
+for (let y = 0; y < N; y++)
+  for (let x = 0; x < N; x++) {
+    const u = (x + 0.5) / N * 2 - 1;
+    const v = (y + 0.5) / N * 2 - 1;
+    if (u * u + v * v > 1) continue;
+    const d = u - 0.45 * Math.sin(-v * Math.PI) * 0.8;
+    const kind = Math.abs(d) < 0.09 ? 'seam' : d < 0 ? 'dev' : 'play';
+    // 球面明暗：左上亮
+    const shade = Math.max(0, 1 - Math.hypot(u + 0.3, v + 0.35) * 0.55);
+    cells.push({ x, y, kind, shade });
+  }
+const S = 20;
+const W = N * S;
+const grass = ['#5fb944', '#4ea338', '#6fca52'];
+---
+
+<svg class="static-planet" viewBox={`-40 -40 ${W + 80} ${W + 80}`} role="img" aria-label="开发与游玩两种状态组成的方块星球示意图">
+  <defs>
+    <radialGradient id="sp-halo">
+      <stop offset="0.7" stop-color="#28b7a6" stop-opacity="0.25" />
+      <stop offset="1" stop-color="#28b7a6" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <circle cx={W / 2} cy={W / 2} r={W / 2 + 36} fill="url(#sp-halo)" />
+  {
+    cells.map(({ x, y, kind, shade }) =>
+      kind === 'dev' ? (
+        <rect
+          x={x * S + 2}
+          y={y * S + 2}
+          width={S - 4}
+          height={S - 4}
+          fill="#0e1a28"
+          stroke="#70eac0"
+          stroke-opacity={0.4 + shade * 0.6}
+          stroke-width="2"
+        />
+      ) : kind === 'seam' ? (
+        <rect x={x * S} y={y * S} width={S} height={S} fill="#7dff6a" opacity={0.55 + shade * 0.45} />
+      ) : (
+        <rect
+          x={x * S}
+          y={y * S}
+          width={S}
+          height={S}
+          fill={grass[Math.floor(hash(x, y) * 3)]}
+          opacity={0.55 + shade * 0.45}
+        />
+      ),
+    )
+  }
+</svg>
+
+<style>
+  .static-planet {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.6s;
+  }
+  :global([data-planet-wrap][data-live]) .static-planet {
+    opacity: 0;
+  }
+</style>

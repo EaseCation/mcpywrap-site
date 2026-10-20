@@ -1,0 +1,190 @@
+---
+// 命令演示：上方像素终端逐条输入真实命令，下方方块舞台抽象表现结果；右侧（移动端在下）是可点击的步骤列表。
+// 步骤列表是服务端渲染的完整内容（命令、说明、复制），终端与舞台只是装饰，读屏跳过。
+import { demos } from '../../data/demos';
+import './demo.css';
+
+interface Props {
+  id: keyof typeof demos;
+}
+const demo = demos[Astro.props.id];
+---
+
+<div class="cdemo" data-demo={demo.id} data-steps={JSON.stringify(demo.steps.map((s) => ({ show: s.show, scene: s.scene, fields: s.fields })))}>
+  <div class="screen" aria-hidden="true">
+    <div class="bar pixel">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span>{demo.title}</span>
+    </div>
+    <div class="term"><span class="line"><b>$</b> <span data-typed></span><span class="cur"></span></span></div>
+    <div class="stage" data-stage></div>
+    <div class="fields" data-fields></div>
+  </div>
+
+  <div class="side">
+    <ol class="steps">
+      {
+        demo.steps.map((s, i) => (
+          <li data-step={i}>
+            <button class="tab pixel" type="button" data-go={i} aria-describedby={`${demo.id}-note-${i}`}>
+              <span class="num">{String(i + 1).padStart(2, '0')}</span>
+              {s.tab}
+            </button>
+            <div class="detail">
+              <p id={`${demo.id}-note-${i}`}>{s.note}</p>
+              <div class="cmd">
+                <code id={`${demo.id}-cmd-${i}`} tabindex="0">{s.show}</code>
+                <button
+                  class="copy pixel"
+                  type="button"
+                  data-copy={s.copy}
+                  data-copy-target={`${demo.id}-cmd-${i}`}
+                  aria-label={`复制完整命令：${s.copy}`}
+                >
+                  <span data-copy-label>复制</span>
+                </button>
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+    {
+      demo.steps.length > 1 && (
+        <div class="ctrl">
+          <button class="btn pixel" type="button" data-toggle>
+            暂停
+          </button>
+          <button class="btn pixel" type="button" data-replay>
+            重播
+          </button>
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<script>
+  import { bindCopy } from '../../scripts/copy';
+  import { Stage, scenes } from './engine';
+  import type { Scene } from '../../data/demos';
+
+  interface S {
+    show: string;
+    scene: Scene;
+    fields: string[];
+  }
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  bindCopy();
+
+  document.querySelectorAll<HTMLElement>('.cdemo').forEach((root) => {
+    const steps: S[] = JSON.parse(root.dataset.steps!);
+    const stage = new Stage(root.querySelector('[data-stage]')!);
+    const typed = root.querySelector<HTMLElement>('[data-typed]')!;
+    const fields = root.querySelector<HTMLElement>('[data-fields]')!;
+    const items = [...root.querySelectorAll<HTMLElement>('[data-step]')];
+    const toggle = root.querySelector<HTMLButtonElement>('[data-toggle]');
+    let current = -1;
+    let playing = false;
+    let started = false;
+    root.dataset.js = '';
+
+    const mark = (i: number) => {
+      current = i;
+      items.forEach((li, k) => {
+        li.toggleAttribute('data-active', k === i);
+        li.toggleAttribute('data-done', k < i);
+        li.querySelector('.tab')!.setAttribute('aria-current', k === i ? 'step' : 'false');
+      });
+    };
+
+    const showFields = (s: S) => {
+      fields.replaceChildren(
+        ...s.fields.map((f) => {
+          const e = document.createElement('span');
+          e.className = 'pixel';
+          e.textContent = f;
+          return e;
+        }),
+      );
+    };
+
+    /** 显示第 i 步：前面各步瞬间完成，当前步按需播放动画 */
+    async function show(i: number, animate: boolean) {
+      stage.reset();
+      const token = stage.token;
+      mark(i);
+      fields.replaceChildren();
+      stage.instant = true;
+      for (let k = 0; k < i; k++) await scenes[steps[k].scene](stage);
+      stage.instant = !animate;
+      const cmd = steps[i].show;
+      if (animate) {
+        typed.textContent = '';
+        for (let c = 0; c < cmd.length; c++) {
+          typed.textContent = cmd.slice(0, c + 1);
+          await stage.wait(c < 5 ? 40 : 14);
+        }
+        await stage.wait(250);
+      } else typed.textContent = cmd;
+      await scenes[steps[i].scene](stage);
+      if (token === stage.token) showFields(steps[i]);
+    }
+
+    async function play(from = 0) {
+      playing = true;
+      if (toggle) toggle.textContent = '暂停';
+      try {
+        for (let i = from; i < steps.length; i++) {
+          await show(i, true);
+          await stage.wait(1500);
+        }
+      } catch {
+        return; // 被打断
+      }
+      playing = false;
+      if (toggle) toggle.textContent = '播放';
+    }
+
+    const stop = () => {
+      playing = false;
+      stage.token++;
+      if (toggle) toggle.textContent = '播放';
+    };
+
+    root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach((b) =>
+      b.addEventListener('click', () => {
+        stop();
+        show(Number(b.dataset.go), !reduced).catch(() => {});
+      }),
+    );
+    toggle?.addEventListener('click', () => {
+      if (playing) stop();
+      else play(current >= steps.length - 1 || current < 0 ? 0 : current + 1);
+    });
+    root.querySelector('[data-replay]')?.addEventListener('click', () => {
+      stop();
+      play(0);
+    });
+
+    if (reduced) {
+      show(steps.length - 1, false).catch(() => {});
+      if (toggle) toggle.textContent = '播放';
+      return;
+    }
+    // 进入视口播一轮后停在最后一步
+    show(0, false).catch(() => {});
+    if (toggle) toggle.textContent = '播放';
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting && !started) {
+          started = true;
+          play(0);
+        }
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(root);
+  });
+</script>

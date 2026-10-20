@@ -1,0 +1,48 @@
+/* Starlight 换肤：沿用同一套令牌 */
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #0f3a37;
+  --sl-color-accent: var(--c-teal);
+  --sl-color-accent-high: var(--c-mint);
+  --sl-color-white: var(--c-prompt);
+  --sl-color-gray-1: #e4eef3;
+  --sl-color-gray-2: var(--c-text);
+  --sl-color-gray-3: var(--c-text-dim);
+  --sl-color-gray-4: #5b7385;
+  --sl-color-gray-5: var(--c-line);
+  --sl-color-gray-6: var(--c-bg-1);
+  --sl-color-black: var(--c-bg);
+  --sl-color-green: var(--c-acid);
+  --sl-font: var(--f-body);
+  --sl-font-mono: var(--f-code);
+}
+
+/* 标题与导航用像素字 */
+.sl-markdown-content :is(h1, h2, h3),
+h1#_top,
+.site-title,
+.sidebar-content .large {
+  font-family: var(--f-pixel);
+  -webkit-font-smoothing: none;
+  letter-spacing: 0;
+}
+h1#_top {
+  font-size: var(--px-36);
+  line-height: 1.33;
+}
+.sl-markdown-content h2 {
+  font-size: var(--px-24);
+}
+.site-title {
+  font-size: var(--px-24);
+  color: var(--c-mint);
+}
+
+/* 代码块与提示框套 MC 斜面 */
+.expressive-code .frame,
+.starlight-aside {
+  border-radius: 0 !important;
+}
+.sl-markdown-content :not(pre) > code {
+  border-radius: 0;
+  color: var(--c-mint);
+}

@@ -1,0 +1,525 @@
+/* 命令演示：像素终端 + 方块舞台 + 步骤列表 */
+.cdemo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .cdemo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.screen {
+  background: var(--c-void);
+  box-shadow: var(--bevel), 0 0 0 2px var(--c-line);
+  overflow: hidden;
+}
+.screen .bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 6px;
+  background: var(--c-bg-2);
+  font-size: var(--px-12);
+  color: var(--c-text-dim);
+}
+.dots {
+  display: flex;
+  gap: 4px;
+}
+.dots i {
+  width: 8px;
+  height: 8px;
+  background: var(--c-line);
+}
+.dots i:first-child {
+  background: var(--c-acid);
+}
+.term {
+  padding: 12px 14px;
+  min-height: 3.6em;
+  font: 14px/1.6 var(--f-code);
+  color: var(--c-prompt);
+  border-bottom: 2px solid var(--c-bg-2);
+  overflow-wrap: anywhere;
+}
+.term b {
+  color: var(--c-acid);
+  font-weight: normal;
+}
+.term .cur {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: var(--c-acid);
+  animation: cd-blink 1.1s steps(1) infinite;
+}
+@keyframes cd-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* 舞台 */
+.cdemo .stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background:
+    linear-gradient(180deg, rgb(40 183 166 / 0.06), transparent 60%),
+    var(--c-bg);
+}
+.cdemo .stage .grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-rows: repeat(var(--rows), 1fr);
+}
+.cdemo .stage .grid i {
+  position: relative;
+  transition: background-color 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+.cdemo .stage .grid i[data-s='empty'] {
+  background: radial-gradient(circle at center, rgb(112 234 192 / 0.1) 1px, transparent 1.5px);
+}
+/* 开发态：深蓝代码块 + 薄荷描边 + 代码行 */
+.cdemo .stage .grid i[data-s='code'] {
+  background:
+    linear-gradient(90deg, var(--c-teal) 0 55%, transparent 55%) 22% 30% / 60% 10% no-repeat,
+    linear-gradient(90deg, var(--c-mint) 0 35%, transparent 35%) 36% 55% / 60% 10% no-repeat,
+    linear-gradient(90deg, var(--c-acid) 0 25%, transparent 25%) 22% 78% / 60% 10% no-repeat,
+    #0e1a28;
+  box-shadow: inset 0 0 0 2px var(--c-mint);
+  transform: scale(0.84);
+}
+/* 游玩态：草顶 + 泥土 */
+.cdemo .stage .grid i[data-s='play'] {
+  background: linear-gradient(180deg, #6fca52 0 30%, #8a5a3b 30% 100%);
+  box-shadow: inset -3px -3px 0 rgb(0 0 0 / 0.25), inset 3px 3px 0 rgb(255 255 255 / 0.12);
+}
+.cdemo .stage .grid i[data-s='dirt'] {
+  background:
+    linear-gradient(135deg, transparent 0 40%, rgb(0 0 0 / 0.12) 40% 60%, transparent 60%),
+    #7a4e33;
+  box-shadow: inset -3px -3px 0 rgb(0 0 0 / 0.25);
+}
+.cdemo .stage .grid i[data-s='seam'] {
+  background: var(--c-acid);
+  box-shadow: 0 0 14px var(--c-acid);
+  transform: scale(1.06);
+  z-index: 1;
+}
+
+.cdemo .stage .layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cdemo .stage .o {
+  position: absolute;
+  left: calc(var(--x) / var(--cols) * 100%);
+  top: calc(var(--y) / var(--rows) * 100%);
+  width: calc(var(--w) / var(--cols) * 100%);
+  height: calc(var(--h) / var(--rows) * 100%);
+  transition: left 0.24s steps(4), top 0.24s steps(4), opacity 0.3s;
+  font-family: var(--f-pixel);
+  font-size: var(--px-12);
+  -webkit-font-smoothing: none;
+  animation: cd-in 0.25s steps(3);
+}
+@keyframes cd-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.cdemo .stage .o.pulse {
+  animation: cd-pulse 0.5s steps(4);
+}
+@keyframes cd-pulse {
+  50% {
+    filter: brightness(1.8) drop-shadow(0 0 6px var(--c-acid));
+  }
+}
+
+/* 小人：头 / 身 / 腿 */
+.o.player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.o.player b {
+  display: block;
+  width: 46%;
+}
+.o.player b:nth-child(1) {
+  height: 28%;
+  background: #e0b088;
+  box-shadow: inset 0 -3px 0 #c08c64;
+}
+.o.player b:nth-child(2) {
+  width: 56%;
+  height: 36%;
+  background: var(--c-teal);
+}
+.o.player b:nth-child(3) {
+  height: 36%;
+  background: #2f4a9a;
+}
+
+.o.chip {
+  width: auto;
+  height: auto;
+  white-space: nowrap;
+  padding: 3px 6px 1px;
+  color: var(--c-void);
+  background: var(--c-mint);
+  box-shadow: var(--bevel);
+}
+.o.chip.dim {
+  color: var(--c-text-dim);
+  background: rgb(23 38 54 / 0.9);
+}
+.o.chip.ok,
+.o.chip.val {
+  background: var(--c-acid);
+}
+.o.chip.hook {
+  background: transparent;
+  color: var(--c-mint);
+  box-shadow: inset 0 0 0 2px var(--c-mint);
+  padding: 6px 10px 4px;
+}
+
+.o.scan {
+  background: linear-gradient(180deg, transparent, rgb(125 255 106 / 0.25) 50%, transparent);
+  background-size: 100% 40%;
+  background-repeat: no-repeat;
+  animation: cd-scan 0.7s steps(8) forwards;
+}
+@keyframes cd-scan {
+  from {
+    background-position: 0 -40%;
+  }
+  to {
+    background-position: 0 140%;
+  }
+}
+.o.hud {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 6px;
+  background: rgb(7 13 21 / 0.85);
+  box-shadow: inset 0 0 0 2px var(--c-acid);
+  color: var(--c-acid);
+}
+.o.hud span {
+  display: flex;
+  align-items: center;
+  padding-left: 4px;
+  border-left: 3px solid var(--c-mint);
+  color: var(--c-prompt);
+}
+.o.cross {
+  display: grid;
+  place-items: center;
+  color: var(--c-prompt);
+  font-size: var(--px-24);
+}
+.o.keys {
+  display: flex;
+  gap: 6px;
+  height: auto;
+}
+.o.keys kbd {
+  font: inherit;
+  padding: 4px 8px 2px;
+  background: var(--c-bg-3);
+  color: var(--c-prompt);
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.4);
+}
+.o.keys kbd[data-on] {
+  background: var(--c-acid);
+  color: var(--c-void);
+  box-shadow: none;
+  transform: translateY(2px);
+}
+.o.flash {
+  background: var(--c-prompt);
+  opacity: 0.85;
+}
+.o.thumb {
+  padding: 3px;
+  background: var(--c-prompt);
+  box-shadow: 4px 4px 0 rgb(0 0 0 / 0.4);
+}
+.o.thumb em {
+  display: block;
+  height: 100%;
+  background: linear-gradient(180deg, #3a6f9a 0 55%, #6fca52 55% 68%, #8a5a3b 68%);
+}
+.o.codeblk {
+  background:
+    linear-gradient(90deg, var(--c-mint) 0 50%, transparent 50%) 25% 35% / 60% 12% no-repeat,
+    linear-gradient(90deg, var(--c-acid) 0 30%, transparent 30%) 25% 70% / 60% 12% no-repeat,
+    #0e1a28;
+  box-shadow: inset 0 0 0 2px var(--c-acid), 0 0 10px var(--c-acid);
+}
+.o.pipe {
+  top: calc(var(--y) / var(--rows) * 100%);
+  background: repeating-linear-gradient(90deg, var(--c-teal) 0 8px, transparent 8px 12px);
+}
+.o.pipe.p2 {
+  background: repeating-linear-gradient(90deg, var(--c-mint) 0 8px, transparent 8px 12px);
+}
+.o.pipe.off {
+  opacity: 0.2;
+}
+.o.lock {
+  width: calc(0.8 / var(--cols) * 100%);
+  height: calc(0.8 / var(--rows) * 100%);
+  background:
+    linear-gradient(var(--c-warm), var(--c-warm)) 50% 100% / 100% 60% no-repeat,
+    radial-gradient(circle at 50% 45%, transparent 30%, var(--c-warm) 31% 45%, transparent 46%) 50% 0 / 100% 70% no-repeat;
+}
+.o.cache {
+  display: grid;
+  place-items: center;
+  color: var(--c-prompt);
+  background: rgb(36 56 73 / 0.9);
+  box-shadow: var(--bevel), 0 0 0 2px var(--c-teal);
+}
+.o.pack {
+  display: grid;
+  place-items: center;
+  color: var(--c-void);
+  background: var(--c-mint);
+  box-shadow: var(--bevel);
+}
+.o.pack.rp {
+  background: var(--c-warm);
+}
+.o.zipbox {
+  display: grid;
+  place-items: center;
+  font-size: var(--px-36);
+  color: var(--c-void);
+  background:
+    repeating-linear-gradient(180deg, var(--c-void) 0 6px, transparent 6px 12px) 12% 0 / 8% 100% no-repeat,
+    var(--c-acid);
+  padding-left: 14%;
+  box-shadow: var(--bevel), 0 0 24px rgb(125 255 106 / 0.5);
+}
+.o.tl {
+  display: grid;
+  place-items: center;
+  color: var(--c-text-dim);
+  border-bottom: 3px solid var(--c-line);
+}
+.o.tl[data-on] {
+  color: var(--c-acid);
+  border-color: var(--c-acid);
+}
+.o.sheet {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+  padding: 4px;
+  background: var(--c-prompt);
+}
+.o.sheet i {
+  background: repeating-linear-gradient(90deg, #5fb944 0 30%, transparent 30% 34%);
+}
+.o.shop {
+  display: grid;
+  place-items: end center;
+  padding-bottom: 4px;
+  color: var(--c-mint);
+  box-shadow: inset 0 0 0 2px var(--c-mint);
+  background: repeating-linear-gradient(45deg, transparent 0 8px, rgb(112 234 192 / 0.07) 8px 16px);
+}
+.o.json {
+  display: grid;
+  place-items: center;
+  font-size: var(--px-24);
+  color: var(--c-void);
+  background: var(--c-mint);
+  box-shadow: var(--bevel);
+}
+.o.server {
+  display: grid;
+  place-items: end center;
+  padding-bottom: 6px;
+  color: var(--c-prompt);
+  background:
+    repeating-linear-gradient(180deg, transparent 0 14%, rgb(0 0 0 / 0.35) 14% 17%),
+    linear-gradient(90deg, transparent 70%, var(--c-acid) 70% 78%, transparent 78%) 0 10% / 100% 8% repeat-y,
+    #3a4b5c;
+  box-shadow: var(--bevel);
+}
+.o.client {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  color: var(--c-text-dim);
+  background: #0e1a28;
+  box-shadow: inset 0 0 0 2px var(--c-teal);
+}
+.o.client em {
+  font-style: normal;
+  color: var(--c-acid);
+  font-size: var(--px-24);
+}
+.o.beam {
+  background: repeating-linear-gradient(90deg, var(--c-line) 0 6px, transparent 6px 10px);
+}
+.o.beam[data-on] {
+  background: repeating-linear-gradient(90deg, var(--c-mint) 0 6px, transparent 6px 10px);
+  box-shadow: 0 0 8px rgb(112 234 192 / 0.6);
+}
+.o.beam[data-ok] {
+  background: var(--c-acid);
+  box-shadow: 0 0 12px var(--c-acid);
+}
+.o.win {
+  box-shadow: inset 0 0 0 2px var(--c-line);
+}
+.o.win em {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  font-style: normal;
+  color: var(--c-text-dim);
+}
+
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-top: 2px solid var(--c-bg-2);
+}
+.fields span {
+  font-size: var(--px-12);
+  padding: 3px 6px 1px;
+  color: var(--c-acid);
+  box-shadow: inset 0 0 0 1px rgb(125 255 106 / 0.5);
+  animation: cd-in 0.25s steps(3);
+}
+
+/* 步骤列表 */
+.side {
+  min-width: 0;
+}
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.steps li {
+  background: var(--c-bg-1);
+  box-shadow: var(--bevel);
+}
+.steps .tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px 8px;
+  background: none;
+  border: 0;
+  color: var(--c-text);
+  font-size: var(--px-12);
+  text-align: left;
+  cursor: pointer;
+}
+.steps .num {
+  color: var(--c-text-dim);
+}
+.steps li[data-done] .num {
+  color: var(--c-teal);
+}
+.steps li[data-active] {
+  box-shadow: var(--bevel), inset 3px 0 0 var(--c-acid);
+}
+.steps li[data-active] .tab,
+.steps li[data-active] .num {
+  color: var(--c-acid);
+}
+.steps .detail {
+  padding: 0 12px 12px;
+}
+/* 有脚本时只展开当前步骤；无脚本时全部展开 */
+.cdemo[data-js] .steps li:not([data-active]) .detail {
+  display: none;
+}
+.steps p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.steps .cmd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 10px;
+  background: var(--c-void);
+}
+.steps code {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  font: 12px/1.6 var(--f-code);
+  color: var(--c-mint);
+}
+.steps .copy {
+  flex: none;
+  font-size: var(--px-12);
+  padding: 5px 8px 3px;
+  border: 0;
+  background: var(--c-teal);
+  color: var(--c-void);
+  cursor: pointer;
+}
+.steps .copy[data-state='done'] {
+  background: var(--c-acid);
+}
+.ctrl {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ctrl .btn {
+  font-size: var(--px-12);
+  padding: 8px 12px 6px;
+  border: 0;
+  background: var(--c-bg-2);
+  color: var(--c-text);
+  box-shadow: var(--bevel);
+  cursor: pointer;
+}
+.ctrl .btn:hover {
+  color: var(--c-acid);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cdemo .stage .o,
+  .cdemo .stage .grid i,
+  .fields span,
+  .term .cur {
+    animation: none !important;
+    transition: none !important;
+  }
+}

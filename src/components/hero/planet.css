@@ -1,0 +1,209 @@
+/* 3D 星球的 DOM 层：徽章、Agent 标签、能力卡片 */
+.planet3d {
+  --fx: 70%;
+  --fy: 45%;
+  --fs: 600px;
+  position: absolute;
+  inset: 0;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  animation: p3d-in 1.2s ease-out both;
+}
+.planet3d:active {
+  cursor: grabbing;
+}
+@keyframes p3d-in {
+  from {
+    opacity: 0;
+  }
+}
+/* 全屏光晕：以星球为中心，左侧开发冷光、右侧游玩暖光，向四周自然散开 */
+.planet3d::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at var(--fx) var(--fy), rgb(40 183 166 / 0.22) 0, rgb(40 183 166 / 0.08) calc(var(--fs) * 0.55), transparent calc(var(--fs) * 1.1)),
+    radial-gradient(circle at calc(var(--fx) - var(--fs) * 0.35) var(--fy), rgb(112 234 192 / 0.1), transparent calc(var(--fs) * 0.8)),
+    radial-gradient(circle at calc(var(--fx) + var(--fs) * 0.35) var(--fy), rgb(242 201 76 / 0.08), transparent calc(var(--fs) * 0.8));
+}
+/* 画布与光晕在 Hero 底部淡出，和下方区块自然衔接 */
+.planet3d::before,
+.pcanvas {
+  -webkit-mask-image: linear-gradient(180deg, #000 0 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0 78%, transparent 100%);
+}
+.pcanvas {
+  position: absolute !important;
+  inset: 0;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.pbadge,
+.ptag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+.pbadge {
+  font-size: var(--px-12);
+  padding: 5px 8px 3px;
+  border: 0;
+  color: var(--c-prompt);
+  background: rgb(11 20 31 / 0.82);
+  box-shadow: var(--bevel), 0 0 0 2px currentColor;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, translate 0.15s;
+}
+.pbadge.dev {
+  color: var(--c-mint);
+}
+.pbadge.seam {
+  color: var(--c-acid);
+}
+.pbadge.play {
+  color: var(--c-warm);
+}
+.pbadge.sat {
+  color: var(--c-prompt);
+}
+.pbadge:hover,
+.pbadge[data-hot],
+.pbadge[data-active] {
+  translate: 0 -4px;
+  background: currentColor;
+}
+.pbadge:hover,
+.pbadge[data-hot],
+.pbadge[data-active] {
+  color: var(--c-void) !important;
+}
+.pbadge.dev:hover,
+.pbadge.dev[data-hot],
+.pbadge.dev[data-active] {
+  background: var(--c-mint);
+}
+.pbadge.seam:hover,
+.pbadge.seam[data-hot],
+.pbadge.seam[data-active] {
+  background: var(--c-acid);
+}
+.pbadge.play:hover,
+.pbadge.play[data-hot],
+.pbadge.play[data-active] {
+  background: var(--c-warm);
+}
+.pbadge.sat:hover,
+.pbadge.sat[data-hot],
+.pbadge.sat[data-active] {
+  background: var(--c-prompt);
+}
+.ptag {
+  font-size: var(--px-12);
+  color: var(--c-acid);
+  padding: 2px 6px 0;
+  background: rgb(7 13 21 / 0.75);
+  border: 1px solid rgb(125 255 106 / 0.5);
+}
+.ptag::before {
+  content: '> ';
+  color: var(--c-mint);
+}
+
+.pcard {
+  position: absolute;
+  left: var(--fx);
+  top: calc(var(--fy) + var(--fs) * 0.46);
+  transform: translate(-50%, -100%);
+  width: min(calc(100% - 32px), 420px);
+  padding: 14px 16px 16px;
+  background: rgb(16 28 43 / 0.95);
+  box-shadow: var(--bevel), 0 0 0 2px var(--c-line), 0 12px 40px rgb(0 0 0 / 0.5);
+  z-index: 400;
+  cursor: auto;
+  user-select: text;
+}
+.pcard-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pcard-head strong {
+  font-size: var(--px-24);
+  font-weight: normal;
+  color: var(--c-prompt);
+}
+.pside {
+  font-size: var(--px-12);
+  padding: 2px 6px 0;
+  color: var(--c-void);
+  background: var(--c-mint);
+}
+.pside.seam {
+  background: var(--c-acid);
+}
+.pside.play {
+  background: var(--c-warm);
+}
+.pside.sat {
+  background: var(--c-prompt);
+}
+.pclose {
+  margin-left: auto;
+  background: none;
+  border: 0;
+  color: var(--c-text-dim);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.pcard p {
+  margin: 10px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.pcmd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--c-void);
+  padding: 8px 8px 8px 10px;
+}
+.pcmd code {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-family: var(--f-code);
+  font-size: 13px;
+  color: var(--c-mint);
+}
+.pcmd code::before {
+  content: '$ ';
+  color: var(--c-acid);
+}
+.pcopy {
+  flex: none;
+  font-size: var(--px-12);
+  padding: 5px 8px 3px;
+  border: 0;
+  background: var(--c-teal);
+  color: var(--c-void);
+  cursor: pointer;
+}
+.pmore {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: var(--px-12);
+  color: var(--c-acid);
+  text-decoration: none;
+}

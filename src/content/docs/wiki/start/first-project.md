@@ -1,0 +1,118 @@
+---
+title: 第一个项目
+description: 初始化 Addon 或地图项目，运行游戏测试并了解常用命令。
+sidebar:
+  order: 2
+---
+
+> 适用于 mcpywrap 0.5.4。
+
+mcpywrap 用 `pyproject.toml` 管理项目和开发侧依赖，并把构建、游戏测试和 MC Studio 编辑器串联起来。本页带你从一个目录开始，完成初始化、运行和打包。
+
+## 快速上手
+
+进入你的 Addon 或地图项目目录，按向导初始化：
+
+```sh
+mcpy init
+```
+
+之后可以直接运行游戏测试，或在 MC Studio 编辑器中打开项目：
+
+```sh
+mcpy run
+mcpy edit
+```
+
+需要查看项目和管理依赖时，打开图形界面：
+
+```sh
+mcpy ui
+```
+
+:::note
+`mcpy edit` 仅支持 Windows。图形界面的说明见 [图形界面](/wiki/local/gui/)。
+:::
+
+## 用参数初始化
+
+不想走向导时，可以直接传参数：
+
+```sh
+mcpy --project <项目> --non-interactive init --name demo --type addon
+```
+
+地图项目使用 `--type map`。`init` 不会覆盖现有配置，也不会自动安装 SDK 或依赖。
+
+如果是刚克隆下来的已有项目，不需要重新 `init`，运行 `sync` 恢复依赖即可：
+
+```sh
+mcpy sync
+```
+
+依赖种类和锁文件规则见 [依赖与 QuMod](/wiki/project/dependencies/)。
+
+## 创建 Mod 框架
+
+`mcpy mod` 用参数或终端问答创建 Python Mod 框架：
+
+```sh
+mcpy mod --name DemoMod --script-dir DemoScript
+```
+
+已有的入口会被保留。如果打算使用 QuMod，直接用 `mcpy add --qumod`，见 [依赖与 QuMod](/wiki/project/dependencies/)。
+
+## 安装 ModSDK 补全库
+
+`mcpy modsdk` 管理网易 ModSDK，用于编辑器代码补全：
+
+```sh
+mcpy modsdk --list
+mcpy modsdk --version <目标版本>
+mcpy modsdk --latest
+```
+
+:::caution
+ModSDK 安装到 mcpy 的工具环境，不是向游戏安装库。具体玩法的 API、事件和 JSON 组件要查目标网易 ModSDK 版本，不要套用 Java 版或通用 Bedrock 的同名接口。
+:::
+
+## 常用命令
+
+| 命令 | 用途 |
+|---|---|
+| `mcpy build` | 将项目和依赖构建到配置的输出目录 |
+| `mcpy package` | 构建项目和依赖，在 `dist` 中生成可分发 ZIP |
+| `mcpy dev` | 监控 Addon 源码与依赖变化，持续更新构建结果 |
+| `mcpy mod` | 用参数或终端问答创建 Python Mod 框架 |
+| `mcpy modsdk` | 管理网易 ModSDK |
+| `mcpy run -n` | 创建新的游戏测试实例 |
+| `mcpy run -l` | 查看已有实例 |
+| `mcpy run -d <ID前缀>` | 删除指定实例 |
+
+构建和打包的细节见 [构建与发布](/wiki/project/build/)。
+
+## 世界与代码的关系
+
+本地世界会保留进度，重新运行时使用当前项目代码。需要理解几点：
+
+- `--new` 只是新建世界。
+- 如果再次 `run` 时接管了已在运行的会话，不会应用新代码，也不会执行预处理脚本。
+- 普通 `build` / `dev` 的输出与游戏运行部署是分开的；`dev` 不是游戏热更。
+- 同一版本的多个世界可以共享部署；有其他世界在使用时不能单方面换版。
+
+启动、停止和世界管理见 [本地世界](/wiki/local/worlds/)；在已运行的游戏里热更代码见 [运行时调试](/wiki/runtime/debug/)。
+
+## 游戏运行边界
+
+测试和正式游戏都使用游戏内置 Python：
+
+- 不读取 `pyproject.toml` 中的 `dependencies`，也不继承工具环境的 `site-packages`。
+- `add`、`sync --install` 和 ModSDK 安装均不向游戏安装模块。
+- 游戏所需的代码与资源必须随 Addon 携带，或由用户加载相应 Mod。纯 Python 库也不会自动复制，仍需适配游戏解释器和 ModSDK。
+- 原生扩展及依赖外部安装步骤、系统环境的库不能直接用于游戏。包内的 `.pyd`、`.dll`、`.so`、`.so.*`（版本号）、`.dylib` 会阻止构建和启动。
+
+## 限制与注意
+
+- 构建成功、产物完整、游戏加载和网易平台验收需要分别确认。
+- mcpywrap 只负责工程与测试流程，不证明业务 API 兼容。
+- 不确定某个命令的参数时，运行 `mcpy <命令> --help`。

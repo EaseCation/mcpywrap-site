@@ -1,0 +1,301 @@
+---
+// 首页。所有能力描述以 plan/HIGHLIGHTS_BREAKDOWN.md 为准，出处对照见 plan/COPY_SOURCES.md
+import Home from '../layouts/Home.astro';
+import Hero from '../components/hero/Hero.astro';
+import Section from '../components/Section.astro';
+import CommandDemo from '../components/demo/CommandDemo.astro';
+import Code from '../components/Code.astro';
+import RealRun from '../components/RealRun.astro';
+import '../styles/sections.css';
+
+const pains = [
+  ['MC Studio 只能在图形界面里点', '25 个公开命令，统一 --json 输出与退出码，脚本和 AI 都能调用'],
+  ['没有包管理，公共代码靠复制粘贴', 'pyproject.toml 声明依赖，Git 依赖锁定提交，克隆后 mcpy sync 即恢复'],
+  ['官方开发环境只支持 Windows', 'Apple Silicon Mac 原生运行本地 Addon 世界，首次运行自动准备资源'],
+  ['每次测试都要手动进游戏点', 'AI 可以自己启动游戏、执行游戏内 Python、操作玩家与 UI、截图、热更'],
+  ['资源预生成、表格转 JSON 只能手工跑', '生命周期脚本在构建、打包、启动前自动执行（0.5.0+）'],
+  ['服务端开发缺少能自动化的客户端', 'mcpy connect 连接指定服务器，复用会话、Python、输入与截图'],
+];
+
+const depsToml = `[[tool.mcpywrap.git_dependencies]]
+name = "shared"
+git = "<仓库 URL>"
+rev = "<首次添加时锁定的完整提交 SHA>"`;
+
+const hooksToml = `[tool.mcpywrap.scripts.assets]
+python = "tools/assets.py"
+args = ["--quality", "development"]
+timeout = 120
+
+[tool.mcpywrap.hooks]
+before_build = ["assets"]
+before_package = ["assets"]
+before_run = ["assets"]`;
+
+const hookTable = [
+  ['build', 'before_build 一次，然后组装'],
+  ['package', 'before_package 一次，组装后可接 before_archive（0.5.3+）'],
+  ['dev', '首次构建前 before_build 一次'],
+  ['本地 run / restart', '真正准备新游戏进程时 before_run 一次'],
+  ['runtime reload、connect、远程 run', '不执行'],
+];
+
+const serverToml = `[tool.mcpywrap.server]
+host = "127.0.0.1"
+port = 19132`;
+
+const macRows: [string, string][] = [
+  ['本地 Addon 世界与世界参数', 'Map 本地运行'],
+  ['client / server Python、热更、JSON UI 重载', '录屏、视频提帧、原始桌面键鼠'],
+  ['统一输入、后台截图', 'MCEditor、MCS 登录身份'],
+  ['无认证服务器连接', '本地主客机双客户端'],
+];
+
+const cards = [
+  {
+    t: '构建与资源合并',
+    d: '主项目与依赖组装成 dist 下的 ZIP，主项目优先；terrain_texture、item_texture、sound_definitions、动画、_ui_defs.json 与 .lang 按规则合并。',
+    c: 'mcpy package',
+  },
+  {
+    t: '世界参数',
+    d: '新建世界时指定类型、模式、难度、种子与 18 个游戏规则开关，多个测试世界可以并存。',
+    c: 'mcpy run --new --world-type flat --seed 12345',
+  },
+  {
+    t: '录屏与逐帧提取',
+    d: 'Windows 后台录制 H.264 MP4（1–300 秒、1–60 FPS），无需 FFmpeg，可按帧号或时间点导出 PNG。',
+    c: 'mcpy record start --session <sid> --duration 10 --fps 30 --json',
+  },
+  {
+    t: '日志小窗与项目界面',
+    d: '交互式 run 自动弹出可置顶日志窗：搜索、Python 控制台、热更、重载世界。mcpy ui 打开 Qt 项目页。',
+    c: 'mcpy ui',
+  },
+  {
+    t: 'MC Studio 编辑器',
+    d: '在 Windows 的 MC Studio 编辑器中打开项目，使用独立的准备目录。',
+    c: 'mcpy edit',
+  },
+  {
+    t: '远程执行',
+    d: '在 Mac 上写代码，让另一台 Windows 跑游戏；支持网络单会话的连接、客户端 Python、输入、截图与录屏下载。',
+    c: 'mcpy --local serve',
+  },
+];
+
+const prompts = [
+  '为这个 Addon 添加 QuMod，并生成分发 ZIP。',
+  '运行前把策划表生成 JSON，检查游戏加载结果。',
+  '保留原世界，用两个客户端验证同步，只重试失败的客机。',
+];
+
+const quick = `uv tool install mcpywrap
+mcpy init
+mcpy add --qumod
+mcpy run`;
+---
+
+<Home>
+  <Hero />
+
+  <Section id="why" index="01" kicker="为什么需要它" title="补上 MC Studio 缺的那一半">
+    <Fragment slot="lead">
+      <p>mcpywrap 继续使用 MC Studio 的引擎与编辑器，把它们接进命令行、包管理和自动化测试。</p>
+    </Fragment>
+    <ul class="pains">
+      {
+        pains.map(([a, b]) => (
+          <li>
+            <p class="pain">{a}</p>
+            <span class="arrow pixel" aria-hidden="true">→</span>
+            <p class="fix">{b}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  <Section id="ai" index="02" kicker="AI 自主测试闭环" title="让 AI 自己进游戏，看完再改" tone="seam">
+    <Fragment slot="lead">
+      <p>
+        从启动世界到热更代码，每一步都是一条返回 JSON 的命令。AI Agent 可以自己观察画面、操作玩家、截图，再在游戏里执行 Python
+        读回结果。
+      </p>
+    </Fragment>
+    <CommandDemo id="ai" />
+    <RealRun />
+    <ul class="facts">
+      <li><b class="pixel">256 步 / 120 秒</b><span>单个输入计划上限，步骤可带断言，request_id 保证幂等</span></li>
+      <li><b class="pixel">client · server</b><span>游戏内 Python 两端都能执行，结果分 completed / unavailable / failed / unknown</span></li>
+      <li><b class="pixel">内置 Skill</b><span>按任务路由到 22 篇参考，AI 不必通读文档</span></li>
+    </ul>
+    <p class="note">
+      边界：completed 只代表控制流程完成，效果需要再观察；Python 热更替换模块，不重建已有对象和回调。游戏仍需要图形会话和
+      GPU。
+    </p>
+  </Section>
+
+  <Section id="deps" index="03" kicker="依赖管理" title="像普通 Python 项目一样管理 Mod 依赖">
+    <Fragment slot="lead">
+      <p>
+        在 <code>pyproject.toml</code> 里声明本地 Addon、Git 仓库和 QuMod。Git 依赖锁定到提交，递归处理子依赖；团队成员克隆后一条
+        <code>mcpy sync</code> 恢复全部框架。
+      </p>
+    </Fragment>
+    <CommandDemo id="deps" />
+    <div class="split">
+      <Code code={depsToml} lang="toml" title="pyproject.toml" />
+      <div class="callout warn">
+        <p class="pixel">注意：Python 包只进开发环境</p>
+        <p>
+          <code>mcpy add "package&gt;=1.0"</code> 只把包装进 mcpy 的工具环境。游戏使用内置 Python，不读取
+          dependencies，也不继承 site-packages；游戏需要的代码必须随 Addon 携带。包内的 .pyd / .dll / .so / .dylib
+          原生二进制会阻止构建和启动。
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <Section id="macos" index="04" kicker="macOS 原生" title="Mac 上也能跑中国版 Addon 测试" tone="seam">
+    <Fragment slot="lead">
+      <p>
+        Apple Silicon、macOS 13.0+。首次 <code>run</code> 自动下载原生运行包和开发者 APK，不需要 Wine、Windows 虚拟机或另一套
+        Launcher。截图直接读取游戏渲染帧，不需要屏幕录制授权。
+      </p>
+    </Fragment>
+    <CommandDemo id="macos" />
+    <table class="captable">
+      <caption class="pixel">macOS 能力表（如实列出）</caption>
+      <thead>
+        <tr><th scope="col">支持</th><th scope="col">暂不支持</th></tr>
+      </thead>
+      <tbody>
+        {
+          macRows.map(([a, b]) => (
+            <tr>
+              <td><span class="yes" aria-hidden="true">✓</span>{a}</td>
+              <td><span class="no" aria-hidden="true">×</span>{b}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </Section>
+
+  <Section id="scripts" index="05" kicker="生命周期脚本 · 0.5.0+" title="构建前，先把资源生成好">
+    <Fragment slot="lead">
+      <p>
+        在构建、打包、启动前自动运行项目自己的生成器：策划表转 JSON、处理贴图、校验资源。脚本在宿主机运行，失败或超时会中断本次操作。
+      </p>
+    </Fragment>
+    <CommandDemo id="scripts" />
+    <div class="split">
+      <Code code={hooksToml} lang="toml" title="pyproject.toml" />
+      <table class="captable compact">
+        <caption class="pixel">什么时候执行</caption>
+        <thead>
+          <tr><th scope="col">操作</th><th scope="col">执行</th></tr>
+        </thead>
+        <tbody>
+          {
+            hookTable.map(([a, b]) => (
+              <tr>
+                <td><code>{a}</code></td>
+                <td>{b}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      脚本可读取 MCPY_PROJECT_ROOT、MCPY_EVENT、MCPY_OPERATION。0.5.2 起，框架依赖还能通过 consumer_prepare
+      带着自己的工具处理消费项目的素材。脚本对源码的写入不会自动回滚。
+    </p>
+  </Section>
+
+  <Section id="server" index="06" kicker="服务器联调" title="开发服务端时，让客户端自己连上来" tone="play">
+    <Fragment slot="lead">
+      <p>
+        开发 Nukkit 等服务端时，用 <code>mcpy connect</code> 启动开发客户端连上指定服务器，再用同一套会话执行客户端 Python、统一输入和截图来验证服务端逻辑。
+      </p>
+    </Fragment>
+    <CommandDemo id="server" />
+    <div class="split">
+      <Code code={serverToml} lang="toml" title="项目长期固定目标时写进 pyproject.toml，然后直接 mcpy run" />
+      <ul class="facts stack">
+        <li><b class="pixel">Windows</b><span>可按次加 --mcs-auth 使用 MC Studio 已登录身份，身份不落盘、日志脱敏</span></li>
+        <li><b class="pixel">macOS</b><span>无认证连接，已用本机 Nemisys + SynapseAPI + Nukkit 测试栈验证</span></li>
+        <li><b class="pixel">双客户端</b><span>--clients 2 建组，组内可统一查状态、看日志、热更，失败客机单独重试</span></li>
+      </ul>
+    </div>
+    <p class="note">
+      边界：服务器需允许无认证的开发客户端（或配合 MCS 身份）。网络会话不装配、上传或部署本地 Mod，不提供服务端 Python。这是中国版（基岩）客户端，与
+      Java 版服务端无关。
+    </p>
+  </Section>
+
+  <Section id="more" index="07" kicker="更多能力" title="日常开发用得上的其他命令">
+    <ul class="cards">
+      {
+        cards.map((c) => (
+          <li class="card">
+            <h3 class="pixel">{c.t}</h3>
+            <p>{c.d}</p>
+            <code tabindex="0">{c.c}</code>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  <Section id="start" index="08" kicker="快速开始" title="四条命令进游戏，或者交给 AI" tone="seam">
+    <div class="split">
+      <div>
+        <Code code={quick} lang="sh" title="在你的 Addon 目录里" copy />
+        <p class="hint">需要 Python 3.9+。Windows 使用 MC Studio 引擎，Apple Silicon Mac 首次运行时自动准备资源。</p>
+      </div>
+      <div class="callout">
+        <p class="pixel">交给 AI</p>
+        <p>
+          让 Agent 安装 <code>EaseCation/mcpywrap</code> 仓库的 <code>skills/mcpywrap</code> 目录（或把整个文件夹复制到它的技能目录）。CLI
+          与 Skill 分开安装。然后直接描述任务：
+        </p>
+        <ul class="prompts">
+          {
+            prompts.map((p, i) => (
+              <li>
+                <span id={`prompt-${i}`}>“{p}”</span>
+                <button class="copy pixel" type="button" data-copy={p} data-copy-target={`prompt-${i}`} aria-label={`复制提示词：${p}`}>
+                  <span data-copy-label>复制</span>
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+        <a class="more pixel" href="/wiki/ai/">AI 接入说明 →</a>
+      </div>
+    </div>
+  </Section>
+
+  <Section id="trust" index="09" kicker="开源" title="MIT 开源，持续发布到 PyPI" tone="play">
+    <ul class="trust">
+      <li><b class="pixel">MIT</b><span>EaseCation 开源维护</span></li>
+      <li><b class="pixel">PyPI</b><span>GitHub Actions 可信发布</span></li>
+      <li><b class="pixel">800+</b><span>个自动化测试</span></li>
+      <li><b class="pixel">0.5.4</b><span>当前版本</span></li>
+    </ul>
+    <p class="links-row">
+      <a class="pixel" href="https://github.com/EaseCation/mcpywrap">GitHub</a>
+      <a class="pixel" href="https://github.com/EaseCation/mcpywrap/issues">反馈问题</a>
+      <a class="pixel" href="https://github.com/EaseCation/mcpywrap/blob/main/CHANGELOG.md">更新记录</a>
+      <a class="pixel" href="https://pypi.org/project/mcpywrap/">PyPI</a>
+      <a class="pixel" href="/wiki/">Wiki</a>
+    </p>
+  </Section>
+  <script>
+    import { bindCopy } from '../scripts/copy';
+    bindCopy();
+  </script>
+</Home>

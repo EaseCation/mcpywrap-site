@@ -1,0 +1,54 @@
+---
+// 首页布局：不经过 Starlight，自带导航与页脚
+import '../styles/tokens.css';
+import '../styles/home.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = 'mcpywrap · 我的世界中国版命令行开发工具',
+  description = '用 Python 标准项目与依赖管理方式开发《我的世界》中国版 Mod 和资源包。',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0b141f" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/fusion-pixel-proportional.woff2" as="font" type="font/woff2" crossorigin />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到正文</a>
+    <header class="nav">
+      <a class="brand pixel" href="/">
+        <img src="/favicon.svg" alt="" width="32" height="32" />
+        <span>mcpywrap</span>
+      </a>
+      <nav aria-label="主导航">
+        <a class="pixel sec-link" href="/#ai">AI 闭环</a>
+        <a class="pixel sec-link" href="/#deps">依赖</a>
+        <a class="pixel sec-link" href="/#macos">macOS</a>
+        <a class="pixel sec-link" href="/#scripts">脚本</a>
+        <a class="pixel sec-link" href="/#server">服务器</a>
+        <a class="pixel" href="/wiki/">Wiki</a>
+        <a class="pixel" href="https://github.com/EaseCation/mcpywrap">GitHub</a>
+      </nav>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="foot">
+      <p>
+        mcpywrap 由 EaseCation 开源维护 · 中文像素字体
+        <a href="https://github.com/TakWolf/fusion-pixel-font">Fusion Pixel</a>（<a href="/fonts/OFL.txt">SIL OFL 1.1</a>）
+      </p>
+    </footer>
+  </body>
+</html>

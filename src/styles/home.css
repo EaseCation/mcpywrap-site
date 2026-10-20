@@ -1,0 +1,107 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  background: var(--c-void);
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font: 16px/1.7 var(--f-body);
+  overflow-x: hidden;
+}
+a {
+  color: var(--c-mint);
+}
+:focus-visible {
+  outline: var(--u) solid var(--c-acid);
+  outline-offset: 2px;
+}
+.skip {
+  position: absolute;
+  left: -999px;
+}
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 100;
+  background: var(--c-bg-2);
+  padding: 8px 12px;
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px clamp(16px, 4vw, 48px);
+  background: rgb(11 20 31 / 0.85);
+  backdrop-filter: blur(6px);
+  border-bottom: var(--u) solid var(--c-bg-2);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--c-prompt);
+  text-decoration: none;
+  font-size: var(--px-24);
+}
+.nav nav {
+  display: flex;
+  gap: 24px;
+}
+.nav nav a {
+  color: var(--c-text);
+  text-decoration: none;
+  font-size: var(--px-24);
+}
+.nav nav a:hover {
+  color: var(--c-acid);
+}
+.nav nav .sec-link {
+  font-size: var(--px-12);
+  color: var(--c-text-dim);
+  align-self: center;
+}
+@media (max-width: 1000px) {
+  .nav nav .sec-link {
+    display: none;
+  }
+}
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.section {
+  padding: clamp(48px, 8vw, 96px) clamp(16px, 4vw, 48px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* MC 斜面面板 */
+.panel {
+  background: var(--c-bg-1);
+  box-shadow: var(--bevel);
+  padding: calc(var(--u) * 5);
+}
+
+.foot {
+  padding: 32px clamp(16px, 4vw, 48px);
+  border-top: var(--u) solid var(--c-bg-2);
+  color: var(--c-text-dim);
+  font-size: 14px;
+}

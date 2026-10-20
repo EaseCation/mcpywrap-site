@@ -1,0 +1,56 @@
+---
+title: mcpywrap Wiki
+description: mcpywrap 使用指南与常见问题，按任务组织。
+tableOfContents: false
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+> 适用于 mcpywrap 0.5.4。内容整理自 mcpywrap 仓库的 README、docs 与内置 Skill；命令细节以 `mcpy <命令> --help` 为准。
+
+## 入门
+
+<CardGrid>
+  <LinkCard title="安装" href="/wiki/start/install/" description="Python 3.9+，uv 或 pip 安装，确认 mcpy 可用。" />
+  <LinkCard title="第一个项目" href="/wiki/start/first-project/" description="init、run、edit，从零跑起一个 Addon。" />
+  <LinkCard title="AI 接入" href="/wiki/ai/" description="安装内置 Skill，让 Agent 自己搭环境、跑游戏、截图验收。" />
+</CardGrid>
+
+## 项目与依赖
+
+<CardGrid>
+  <LinkCard title="构建与发布" href="/wiki/project/build/" description="build、package、dev 与资源合并规则。" />
+  <LinkCard title="依赖与 QuMod" href="/wiki/project/dependencies/" description="本地 Addon、Git 依赖、QuMod 预设与 sync。" />
+  <LinkCard title="项目脚本" href="/wiki/project/scripts/" description="before_build / before_package / before_run / before_archive。" />
+  <LinkCard title="依赖的资源准备" href="/wiki/project/consumer-prepare/" description="框架依赖为消费项目处理素材。" />
+</CardGrid>
+
+## 本地测试
+
+<CardGrid>
+  <LinkCard title="本地世界" href="/wiki/local/worlds/" description="实例、会话、世界参数与受控部署。" />
+  <LinkCard title="macOS 平台" href="/wiki/local/macos/" description="Apple Silicon 原生运行包、能力边界与资源维护。" />
+  <LinkCard title="图形界面" href="/wiki/local/gui/" description="mcpy ui 项目页与日志小窗。" />
+</CardGrid>
+
+## 运行时
+
+<CardGrid>
+  <LinkCard title="运行时调试" href="/wiki/runtime/debug/" description="游戏内 Python、热更与监控。" />
+  <LinkCard title="统一输入" href="/wiki/runtime/input/" description="observe → run 计划 → 查询结果。" />
+  <LinkCard title="截图与录屏" href="/wiki/runtime/capture/" description="后台截图、Windows 录屏与逐帧提取。" />
+</CardGrid>
+
+## 联机与远程
+
+<CardGrid>
+  <LinkCard title="连接服务器" href="/wiki/network/server/" description="connect 连接指定服务器，适合 Nukkit 等服务端开发。" />
+  <LinkCard title="双客户端" href="/wiki/network/dual-clients/" description="两名玩家同一世界验证同步。" />
+  <LinkCard title="远程执行" href="/wiki/network/remote/" description="Mac 写代码，Windows 跑游戏。" />
+</CardGrid>
+
+## 参考
+
+<CardGrid>
+  <LinkCard title="故障排查" href="/wiki/reference/troubleshooting/" description="常见错误与处理方法。" />
+</CardGrid>

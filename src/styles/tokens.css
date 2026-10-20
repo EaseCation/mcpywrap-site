@@ -1,0 +1,60 @@
+/* 设计令牌：取自 mcpy 图标（深蓝底 / 薄荷绿方块 / 白色提示符），加亮绿作黑客感点缀 */
+@font-face {
+  font-family: 'Fusion Pixel';
+  src: url('/fonts/fusion-pixel-proportional.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Fusion Pixel Mono';
+  src: url('/fonts/fusion-pixel-mono.woff2') format('woff2');
+  font-display: swap;
+}
+
+:root {
+  /* 背景层级（图标底色渐变 #243849 → #101c2b 延伸） */
+  --c-void: #070d15;
+  --c-bg: #0b141f;
+  --c-bg-1: #101c2b;
+  --c-bg-2: #172636;
+  --c-bg-3: #243849;
+  --c-line: #2c4357;
+
+  /* 方块三面 */
+  --c-mint: #70eac0;
+  --c-teal: #28b7a6;
+  --c-deep: #168b91;
+
+  /* 点缀 */
+  --c-acid: #7dff6a; /* 终端亮绿，仅用于光标、高亮、成功态 */
+  --c-prompt: #f1fff9;
+  --c-warm: #f2c94c; /* 游玩态暖光 */
+  --c-grass: #5fb944;
+  --c-dirt: #8a5a3b;
+  --c-heart: #e8504f;
+
+  --c-text: #d6e6ee;
+  --c-text-dim: #8ba3b3;
+
+  /* 字体：像素字只用于短文本，字号取 12 的整数倍 */
+  --f-pixel: 'Fusion Pixel', ui-monospace, monospace;
+  --f-pixel-mono: 'Fusion Pixel Mono', ui-monospace, monospace;
+  --f-body: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'Noto Sans CJK SC', sans-serif;
+  --f-code: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --px-12: 12px;
+  --px-24: 24px;
+  --px-36: 36px;
+  --px-48: 48px;
+
+  /* 像素网格单位与 MC 斜面边框 */
+  --u: 4px;
+  --bevel: inset calc(var(--u) * -1) calc(var(--u) * -1) 0 0 rgb(0 0 0 / 0.45),
+    inset var(--u) var(--u) 0 0 rgb(255 255 255 / 0.08);
+}
+
+.pixel {
+  font-family: var(--f-pixel);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  image-rendering: pixelated;
+}

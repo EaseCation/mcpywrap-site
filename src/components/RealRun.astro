@@ -1,0 +1,103 @@
+---
+// 实机记录：两张原始截图 + 采集时真实返回的字段（见 src/assets/captures/CAPTURES.md）
+import { Image } from 'astro:assets';
+import before from '../assets/captures/macos-flat-before.png';
+import after from '../assets/captures/macos-flat-after.png';
+---
+
+<figure class="realrun">
+  <figcaption class="pixel">实机记录 · macOS 26.6.2 · Apple Silicon · mcpy 0.5.2 · 2026-10-21</figcaption>
+  <div class="pair">
+    <div class="shot">
+      <Image src={before} alt="平坦世界的游戏画面：草地和天空，一只鸡站在远处" widths={[480, 720]} sizes="(max-width: 900px) 92vw, 560px" />
+      <dl>
+        <dt>observe</dt><dd>position [0.5, -60.0, 0.5] · yaw 0 · pitch 0</dd>
+      </dl>
+    </div>
+    <div class="arrow-col" aria-hidden="true">
+      <span class="pixel">input run</span>
+      <code>player.look yaw 35 pitch 12<br />player.move forward 2500ms</code>
+      <span class="pixel big">→</span>
+    </div>
+    <div class="shot">
+      <Image src={after} alt="输入计划执行后的游戏画面：视角转向并略微抬高，鸡已不在视野内" widths={[480, 720]} sizes="(max-width: 900px) 92vw, 560px" />
+      <dl>
+        <dt>observe</dt><dd>position [-5.69, -60.0, 9.34] · yaw 35.0 · pitch 12.0</dd>
+      </dl>
+    </div>
+  </div>
+  <p class="foot">两张图都是 <code>mcpy screenshot --background-only</code> 的原始输出（capture=launcher-framebuffer，1440×960），没有修图。</p>
+</figure>
+
+<style>
+  .realrun {
+    margin: 28px 0 0;
+    padding: 16px;
+    background: var(--c-bg-1);
+    box-shadow: var(--bevel);
+  }
+  figcaption {
+    margin-bottom: 12px;
+    font-size: var(--px-12);
+    color: var(--c-acid);
+  }
+  .pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+  }
+  .shot :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    box-shadow: 0 0 0 2px var(--c-line);
+  }
+  dl {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0 0;
+    font: 12px/1.5 var(--f-code);
+  }
+  dt {
+    color: var(--c-acid);
+  }
+  dd {
+    margin: 0;
+    color: var(--c-text);
+  }
+  .arrow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    font-size: var(--px-12);
+    color: var(--c-mint);
+  }
+  .arrow-col code {
+    font: 11px/1.5 var(--f-code);
+    color: var(--c-text-dim);
+  }
+  .big {
+    font-size: var(--px-36);
+    color: var(--c-acid);
+  }
+  .foot {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--c-text-dim);
+  }
+  .foot code {
+    font-family: var(--f-code);
+    color: var(--c-mint);
+  }
+  @media (max-width: 900px) {
+    .pair {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .big {
+      transform: rotate(90deg);
+    }
+  }
+</style>

@@ -1,0 +1,173 @@
+---
+// Hero 一键安装命令框：uv / pip 切换，复制不含 "$"
+const options = [
+  { id: 'uv', label: 'uv', cmd: 'uv tool install mcpywrap' },
+  { id: 'pip', label: 'pip', cmd: 'pip install mcpywrap' },
+];
+---
+
+<div class="install" data-install>
+  <div class="tabs" role="tablist" aria-label="安装方式">
+    {
+      options.map((o, i) => (
+        <button
+          class="tab pixel"
+          role="tab"
+          id={`install-tab-${o.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-controls={`install-panel-${o.id}`}
+          tabindex={i === 0 ? 0 : -1}
+          data-tab={o.id}
+        >
+          {o.label}
+        </button>
+      ))
+    }
+  </div>
+  {
+    options.map((o, i) => (
+      <div
+        class="cmd"
+        role="tabpanel"
+        id={`install-panel-${o.id}`}
+        aria-labelledby={`install-tab-${o.id}`}
+        hidden={i !== 0}
+      >
+        <span class="prompt" aria-hidden="true">$</span>
+        <code id={`install-cmd-${o.id}`} tabindex="0">{o.cmd}</code>
+        <span class="caret" aria-hidden="true" />
+        <button
+          class="copy pixel"
+          type="button"
+          data-copy={o.cmd}
+          data-copy-target={`install-cmd-${o.id}`}
+          aria-label={`复制安装命令：${o.cmd}`}
+        >
+          <span data-copy-label>复制</span>
+        </button>
+      </div>
+    ))
+  }
+  <p class="note">
+    需要 Python 3.9+；装好后运行 <code>mcpy --help</code>。还没有 uv？看
+    <a href="https://docs.astral.sh/uv/getting-started/installation/">uv 安装说明</a>。
+  </p>
+</div>
+
+<script>
+  import { bindCopy } from '../scripts/copy';
+  bindCopy();
+  document.querySelectorAll<HTMLElement>('[data-install]').forEach((box) => {
+    const tabs = [...box.querySelectorAll<HTMLButtonElement>('[role=tab]')];
+    const select = (tab: HTMLButtonElement) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        box.querySelector<HTMLElement>(`#${t.getAttribute('aria-controls')}`)!.hidden = !on;
+      });
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(t));
+      t.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        const next = tabs[(i + d + tabs.length) % tabs.length];
+        select(next);
+        next.focus();
+      });
+    });
+  });
+</script>
+
+<style>
+  .install {
+    width: 100%;
+    max-width: 560px;
+  }
+  .tabs {
+    display: flex;
+  }
+  .tab {
+    font-size: var(--px-12);
+    padding: 6px 14px 4px;
+    background: var(--c-bg-2);
+    color: var(--c-text-dim);
+    border: 0;
+    cursor: pointer;
+  }
+  .tab[aria-selected='true'] {
+    background: var(--c-bg-1);
+    color: var(--c-acid);
+  }
+  .cmd {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--c-bg-1);
+    box-shadow: var(--bevel), 0 0 0 2px var(--c-line);
+    padding: 14px 12px 14px 18px;
+    font-family: var(--f-code);
+    font-size: 17px;
+  }
+  .cmd[hidden] {
+    display: none;
+  }
+  .prompt {
+    color: var(--c-acid);
+    user-select: none;
+  }
+  code {
+    color: var(--c-prompt);
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .caret {
+    width: 9px;
+    height: 18px;
+    background: var(--c-acid);
+    animation: blink 1.1s steps(1) infinite;
+    margin-right: auto;
+  }
+  .copy {
+    flex: none;
+    font-size: var(--px-12);
+    padding: 8px 12px 6px;
+    background: var(--c-teal);
+    color: var(--c-void);
+    border: 0;
+    box-shadow: var(--bevel);
+    cursor: pointer;
+  }
+  .copy:hover {
+    background: var(--c-mint);
+  }
+  .copy[data-state='done'] {
+    background: var(--c-acid);
+  }
+  .note {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--c-text-dim);
+  }
+  .note code {
+    color: var(--c-mint);
+    font-size: 13px;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .caret {
+      animation: none;
+    }
+  }
+  @media (max-width: 480px) {
+    .cmd {
+      font-size: 14px;
+      padding-left: 12px;
+    }
+  }
+</style>

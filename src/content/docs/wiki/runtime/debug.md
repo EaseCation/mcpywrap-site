@@ -1,0 +1,125 @@
+---
+title: 运行时调试
+description: 在已运行的游戏会话中执行 Python、热更模块、监控源码变化，以及重载 JSON UI 等资源。
+sidebar:
+  order: 1
+---
+
+> 适用于 mcpywrap 0.5.4。
+
+游戏会话运行起来以后，可以直接在客户端或服务端执行 Python，热更已加载的模块，或重载 JSON UI 等资源，不必重开世界。本页从一个已经存在的 session 开始；启动和找回会话见 [本地世界](/wiki/local/worlds/)。
+
+## 快速上手
+
+```sh
+# 1. 确认会话与能力
+mcpy --local --project <项目> --non-interactive status --session <sid> --json
+mcpy --local --project <项目> --non-interactive runtime capabilities --session <sid> --json
+
+# 2. 执行 Python
+mcpy --local --project <项目> --non-interactive runtime py --session <sid> --side client --code "1 + 1" --json
+
+# 3. 热更模块
+mcpy --local --project <项目> runtime reload python --session <sid> --module MyMod.client.logic --side client --json
+```
+
+远端会话的能力用 `doctor --capabilities` 查询。如果会话属于联调组，更新代码前先看 [双客户端](/wiki/network/dual-clients/) 的组热更规则，不能用单会话入口绕过组协调。
+
+## 查询会话能力
+
+`runtime capabilities --session <sid> --json` 返回 `schema_version=1`：
+
+- `control` 描述控制端要求；
+- `python` 给出可执行的端侧和 worker 队列声明；
+- `reload` 按后端限制返回 `available` / `unsupported` / `unavailable`。
+
+查询不会执行游戏代码，也不返回控制凭据；`available` 只说明允许调用。旧 worker 缺少队列声明时返回 null，不能据此推断支持。
+
+## 执行 Python
+
+```sh
+mcpy --local --project <项目> --non-interactive runtime py --session <sid> --side client --code "1 + 1" --json
+mcpy --local --project <项目> --non-interactive runtime py --session <sid> --side server --file <服务端探针.py> --json
+```
+
+- `--code` 和 `--file` 二选一。文件在调用端按 UTF-8 读取，远程时传的是内容而不是路径。
+- 本地世界可以在客户端和服务端执行；网络会话和客机只能在客户端执行。
+- 验收时用正式 ModSDK 或项目已有函数，不要把临时的 `mcpy.*` 写进业务代码。
+
+| 结果 | 含义与处理 |
+|---|---|
+| `completed` | 检查 side、stdout/stderr、value/error；实际效果仍需断言 |
+| `unavailable` | 通道或脚本系统尚未就绪，先查会话和日志 |
+| `failed` | 读取异常信息；可能已有部分副作用，不要自动重试 |
+| `unknown` | 原代码可能仍在执行；保留原请求，查状态和日志，不要换 ID 重发 |
+
+### 客户端异步队列
+
+默认同步执行。只有当前会话报告 `python.client_queue=true` 时，才能对客户端使用 `--no-wait` 或 `--wait-until <无副作用表达式>`，之后用下面的命令查询结果：
+
+```sh
+mcpy --local --project <项目> --non-interactive runtime py-result <request_id> --session <sid> --json
+```
+
+`--cancel` 只能取消尚未执行的客户端请求。远端和服务端都不支持这组队列选项。更新 CLI 不会替换已经在运行的 worker。
+
+### 确认客户端进入 HUD
+
+需要比「进程存活」更强的只读就绪确认时，可以在客户端执行：
+
+```python
+try:
+    import mod.client.extraClientApi as api, gui
+    _result = api.GetLevelId() not in (None, -1, '-1') and gui.get_top_screen() == 'hud_screen'
+except (ImportError, AttributeError):
+    _result = False
+```
+
+这个探针只证明客户端已进入 HUD。服务端初始化、多人同步和玩法效果需要分别验证。
+
+## 单会话热更
+
+```sh
+mcpy --local --project <项目> runtime reload python --session <sid> --module MyMod.client.logic --side client --json
+mcpy --local --project <项目> runtime reload python --session <sid> --module MyMod.server.logic --side server --json
+mcpy --local --project <项目> runtime reload ui --session <sid> --json
+mcpy --local --project <项目> runtime watch --session <sid> --side client
+```
+
+Python 热更的规则：
+
+- 用项目内的 `--file` 或 `--module` 指定目标，二者不能同时给。
+- 模块必须已经加载。执行新源码不会重建已有的类实例、订阅或游戏状态。
+- 服务端初始化模块要明确写 `--side server`，不要用默认的 client 去试。
+- 单会话 `reload` 不接受 `both`。
+
+热更前仍会经过部署保护：存在未授权的其他读者，或依赖/包身份发生变化时会报错，失败不会退化为直接复制运行目录。
+
+### 持续监控
+
+`runtime watch` 是持续运行的文本命令，不加 `--json`。中断它只停止监控，游戏继续运行。`watch` 可以显式使用 `--side both`，但只适合能在两端安全执行的公共模块。
+
+`watch` 不执行项目预处理钩子；文件删除和结构变化请按提示重新运行。`dev` 是离线构建，两者不能互换。
+
+:::caution
+结果为未知、`partial` 或 `reload_side_mismatch` 时，不要重复注入有副作用的模块。先核对实际成员、端侧、日志和能力。
+:::
+
+## 资源重载
+
+资源重载只作用于客户端。`ui` 不需要文件；`particle`、`material`、`shader` 需要用 `--file` 指向项目内的目标文件。先检查当前会话的能力和 reason，收到 `unsupported` 时不要换隐蔽接口绕过。
+
+- JSON UI 返回 `triggered` / `effect_verified=false` 表示请求已投递。请重新打开界面，按 Mod 的正常逻辑创建控件并绑定回调，再检查实际文字和画面。旧节点句柄可能失效。
+- 当前 macOS 开发包不会因该重载触发 `UiInitFinished`。不要全局伪造事件，也不要把调试用的 `_mcpy_launcher` 当作业务 API。新资源和复杂继承仍可能需要重开世界。
+- Windows 3.9.0.401155 / 3.10.0.420447 的 Shader 重载被禁用，Material 没有对应接口。macOS 的协议和版本差异见 [macOS 平台](/wiki/local/macos/)。
+- 组资源热更目前明确拒绝；主机文件更新不等于客机下载缓存已更新，详见 [双客户端](/wiki/network/dual-clients/)。
+
+## 什么时候改用重载世界
+
+修改事件注册、类结构、新增入口、删除模块，或改动不支持动态加载的资源时，模块热更不够用。此时停止相关会话后重新 `run` 原实例，或使用 `restart --session <sid> --json`；图形界面中对应「重新部署并重载世界」，见 [图形界面](/wiki/local/gui/)。
+
+## 限制与注意
+
+- 不要根据名称相似就假定某个重载接口存在，以 `runtime capabilities` 为准。
+- 要操作 UI 或玩家而不是修改代码，请使用 [统一输入](/wiki/runtime/input/)。
+- 热更或重载结果只说明请求已处理，画面和玩法是否生效需要自己验证。
