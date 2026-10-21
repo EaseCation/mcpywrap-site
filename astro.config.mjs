@@ -24,6 +24,7 @@ export default defineConfig({
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/EaseCation/mcpywrap' }],
       customCss: ['./src/styles/tokens.css', './src/styles/starlight.css'],
       components: {
+        Head: './src/components/starlight/Head.astro',
         // 品牌只有深色主题
         ThemeProvider: './src/components/starlight/ThemeProvider.astro',
         ThemeSelect: './src/components/starlight/Empty.astro',
