@@ -15,3 +15,15 @@
 - 图中为独立 VS Code 展示环境：Python、Pylance、mcpywrap 与对应语言/环境支持扩展；项目 ModSDK 补全库已安装并由插件识别。
 - 画面展示项目源码、原生脚本系统输出及世界/会话管理。截图本身不作为代码补全弹窗或运行时执行回执的证据。
 - 演示项目及隔离编辑器位于忽略的 `.local/vscode-showcase/`，不进入公开网站仓库。
+
+## Wiki 图解（2026-10-21）
+
+`wiki/raw/` 保存实机原始采集。`src/data/wiki-captures.json` 记录裁剪范围、高亮区域与编号说明，`node scripts/annotate-captures.mjs` 生成 `public/wiki-images/` 下的无损 WebP。只裁剪和叠加编号框，不重绘控件、不伪造日志；点击文档中的图片可打开原分辨率标注图。
+
+- `ui-*.png`：Computer Use 采集本机 mcpy ui；使用 Hello Addon 项目，接入已有会话。窗口总览、Git/QuMod 表单、世界设置、日志搜索、Python 查询及运行环境对话框均来自实际界面。世界创建和安装对话框只查看并取消，没有创建额外世界或重装运行资源。
+- `ui-python.png`：通过 GUI 的 client 控制台执行示例组件的 `player_position()`，收到实际坐标和 completed。
+- `vscode-environment.png`：独立 VS Code 展示环境的 ModSDK 菜单，读取实际已安装的项目虚拟环境。
+- `vscode-runtime.png`：在独立游戏内草稿中执行同一只读查询，展示 client 目标、真实游戏回执和坐标。截图中尚未保存的草稿不属于业务项目。
+- `vscode-workspace.png`：沿用用户提供的原始 Hello Addon 工作区截图，派生工作区导览与项目结构局部图。
+- Qt 采集使用独立 Python / PySide6 环境。较新的 Qt Cocoa 无障碍层在自动读取时崩溃，改用兼容 Qt 采集；同时修复了 `SessionController.connect` 遮蔽 `QObject.connect` 的命名冲突。此修改不改变 GUI 布局或服务器连接语义。
+- 画面中的版本、会话 ID、时间及路径只记录采集现场，不作为文档要求或需要照抄的参数。

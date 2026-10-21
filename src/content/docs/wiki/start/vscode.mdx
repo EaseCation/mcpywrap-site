@@ -5,6 +5,8 @@ sidebar:
   order: 3
 ---
 
+import GuideCapture from '../../../../components/GuideCapture.astro';
+
 [mcpywrap — 游戏测试工作区](https://marketplace.visualstudio.com/items?itemName=easecation.mcpywrap-vscode)把项目、测试世界、游戏日志和运行时 Python 接进 VS Code。扩展调用独立安装的 mcpy CLI，使用同一套项目与游戏会话。
 
 ## 安装与准备
@@ -23,6 +25,8 @@ sidebar:
 
 若 VS Code 找不到 mcpy，执行“mcpy: 配置 CLI 路径”，填写 mcpy 可执行文件的完整路径。版本兼容要求以[扩展说明](https://github.com/EaseCation/mcpywrap-vscode#readme)为准；功能提示 CLI 过旧时升级 mcpy 后重试。
 
+<GuideCapture id="vscode-workspace" />
+
 ## 准备 ModSDK 自动补全
 
 打开普通项目 `.py` 文件，使用 Microsoft Python 的“选择解释器”选定开发环境，再点击状态栏的 **ModSDK**，或选择“游戏测试 → Python 开发环境与补全”。
@@ -33,6 +37,8 @@ sidebar:
 - 缺少补全库时会提示准备；安装和版本选择由你确认。
 - 普通 Python 文件的 API 补全和代码跳转由 Pylance 提供。如果未刷新，可在管理菜单中选择“刷新 Python 补全服务”。
 - 多项目的解释器作用域以 Microsoft Python 的实际选择为准；嵌套项目不一定各自使用独立环境。
+
+<GuideCapture id="vscode-environment" />
 
 :::note[开发环境与游戏环境]
 补全库安装到 VS Code 使用的宿主 Python。游戏仍使用引擎内置 Python；补全库不会被打包进游戏，也不会改变游戏的 Python 版本。
@@ -85,6 +91,8 @@ print("Player position: {}".format(position))
 ```
 
 代码在所选游戏会话内执行，受目标引擎的 Python 和 ModSDK 约束。服务端执行仅在会话确实提供该能力时出现；外部服务器连接不意味着可以执行服务器代码。
+
+<GuideCapture id="vscode-runtime" />
 
 ## 手动热更模块
 

@@ -5,6 +5,8 @@ sidebar:
   order: 2
 ---
 
+import GuideCapture from '../../../../components/GuideCapture.astro';
+
 mcpywrap 支持三类依赖：mcpy 工具环境里的 Python 包、本机已有的 Addon 目录，以及 Git 仓库。QuMod 是 Git 依赖的一个预设。
 
 ## 快速上手
@@ -20,6 +22,12 @@ mcpywrap 支持三类依赖：mcpy 工具环境里的 Python 包、本机已有�
 | 移除 | `mcpy remove <包名>` / `remove --path <目录>` / `remove --git <name>` |
 
 不带参数运行 `mcpy add` / `mcpy remove` 可以进入选择向导。图形界面 `mcpy ui` 中也有"Git 依赖"表单，见 [图形界面](/wiki/local/gui/)。
+
+## 在 mcpy ui 中添加
+
+打开 `mcpy ui`，在左侧选择依赖类型，填写对应表单；已有项目使用“同步项目依赖”恢复锁定内容。
+
+<GuideCapture id="ui-dependencies" />
 
 ## Python 包：只进工具环境
 

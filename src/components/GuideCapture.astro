@@ -1,0 +1,34 @@
+---
+import captures from '../data/wiki-captures.json';
+interface Props { id: keyof typeof captures }
+const { id } = Astro.props;
+const capture = captures[id];
+const width = capture.crop[2] + 64;
+const height = capture.crop[3] + 64;
+const url = `/wiki-images/${id}.webp`;
+---
+<figure class="guide-capture" style={`--capture-max: ${width / 2}px`}>
+  <a class="guide-image" href={url} target="_blank" rel="noopener" aria-label={`放大查看：${capture.title}`}>
+    <img src={url} width={width} height={height} alt={capture.alt} loading="lazy" decoding="async" />
+  </a>
+  <figcaption>
+    <div class="guide-caption"><strong>{capture.title}</strong><a href={url} target="_blank" rel="noopener">放大查看 ↗</a></div>
+    <ol class="guide-legend">
+      {capture.marks.map((mark, i) => <li><span aria-hidden="true">{i + 1}</span><p>{mark.text}</p></li>)}
+    </ol>
+  </figcaption>
+</figure>
+<style>
+  .guide-capture { margin: 1.6rem 0 2rem; padding: 0; border: 1px solid var(--c-line); background: var(--c-bg-1); }
+  .guide-image { display: block; padding: 12px; }
+  .guide-image img { display: block; width: 100%; max-width: var(--capture-max); height: auto; margin: 0 auto; }
+  figcaption { margin: 0; padding: 16px 20px; border-top: 1px solid var(--c-line); font-size: 14px; }
+  .guide-caption { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 20px; flex-wrap: wrap; }
+  .guide-caption strong { color: var(--c-prompt); font-weight: 600; }
+  .guide-caption a { font-size: 12px; white-space: nowrap; }
+  .guide-legend { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+  .guide-legend li { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 0; }
+  .guide-legend li > span { display: flex; align-items: center; justify-content: center; flex: 0 0 23px; height: 23px; border: 1px solid #f6ad53; border-radius: 4px; background: #142636; color: white; font: 600 13px/1 var(--f-code); }
+  .guide-legend p { margin: 0; font-size: 14px; line-height: 1.7; color: var(--c-text); }
+  @media (max-width: 480px) { .guide-image { padding: 6px; } figcaption { padding: 14px; } }
+</style>

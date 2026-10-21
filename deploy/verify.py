@@ -36,7 +36,8 @@ def main():
     args = parser.parse_args()
     base = args.base_url.rstrip('/')
     routes = {'/': 'index.html', '/wiki/': 'wiki/index.html', '/wiki': 'wiki/index.html'}
-    for path in ('start/install', 'start/vscode', 'project/dependencies', 'runtime/input'):
+    for path in ('start/install', 'start/first-project', 'start/vscode', 'local/gui',
+                 'local/worlds', 'local/macos', 'project/dependencies', 'runtime/debug', 'runtime/input'):
         for suffix in ('', '/'):
             routes[f'/wiki/{path}{suffix}'] = f'wiki/{path}/index.html'
     routes['/sitemap-index.xml'] = 'sitemap-index.xml'
@@ -45,6 +46,8 @@ def main():
     for path in assets:
         routes[path] = path.lstrip('/')
     routes['/pagefind/pagefind.js'] = 'pagefind/pagefind.js'
+    for path in sorted((ROOT / 'wiki-images').glob('*.webp')):
+        routes['/wiki-images/' + path.name] = 'wiki-images/' + path.name
     missing = ('/__mcpywrap_missing__/', '/wiki/__mcpywrap_missing__', '/_astro/__mcpywrap_missing__.js')
     failures = []
     for path, local in list(routes.items()) + [(path, None) for path in missing]:
@@ -62,7 +65,7 @@ def main():
                     content_type = headers.get('Content-Type', '')
                     expected_type = next((mime for suffix, mime in (
                         ('.html', 'text/html'), ('.js', 'javascript'),
-                        ('.css', 'text/css'), ('.png', 'image/png'),
+                        ('.css', 'text/css'), ('.png', 'image/png'), ('.webp', 'image/webp'),
                     ) if local.endswith(suffix)), None)
                     if expected_type and expected_type not in content_type:
                         raise ValueError(f'Incorrect Content-Type: {content_type}')

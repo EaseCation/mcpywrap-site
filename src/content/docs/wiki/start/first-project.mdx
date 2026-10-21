@@ -5,6 +5,8 @@ sidebar:
   order: 2
 ---
 
+import GuideCapture from '../../../../components/GuideCapture.astro';
+
 mcpywrap 用 `pyproject.toml` 管理项目和开发侧依赖，并把构建、游戏测试和 MC Studio 编辑器串联起来。本页带你从一个目录开始，完成初始化、运行和打包。
 
 ## 快速上手
@@ -60,6 +62,8 @@ mcpy mod --name DemoMod --script-dir DemoScript
 
 已有的入口会被保留。如果打算使用 QuMod，直接用 `mcpy add --qumod`，见 [依赖与 QuMod](/wiki/project/dependencies/)。
 
+<GuideCapture id="project-structure" />
+
 ## 安装 ModSDK 补全库
 
 `mcpy modsdk` 管理网易 ModSDK，用于编辑器代码补全：
@@ -71,7 +75,7 @@ mcpy modsdk --latest
 ```
 
 :::caution
-ModSDK 安装到 mcpy 的工具环境，不是向游戏安装库。具体玩法的 API、事件和 JSON 组件要查目标网易 ModSDK 版本，不要套用 Java 版或通用 Bedrock 的同名接口。
+未指定 `--python` 时，ModSDK 安装到 mcpy 的工具环境。VS Code 用户可按[插件指南](/wiki/start/vscode/#准备-modsdk-自动补全)安装到编辑器实际选择的环境；也可用 `mcpy modsdk --version <目标版本> --python <解释器绝对路径>` 明确指定目标。它不是向游戏安装库。具体玩法的 API、事件和 JSON 组件要查目标网易 ModSDK 版本，不要套用 Java 版或通用 Bedrock 的同名接口。
 :::
 
 ## 常用命令

@@ -5,6 +5,8 @@ sidebar:
   order: 1
 ---
 
+import GuideCapture from '../../../../components/GuideCapture.astro';
+
 本地世界是在本机运行游戏、加载当前项目 Addon 的测试世界，Windows 和 macOS 使用同一套命令。本页覆盖单人世界的启动、找回、代码更新、世界设置和停止。两名玩家联调见 [双客户端](/wiki/network/dual-clients/)，连接外部服务器见 [连接服务器](/wiki/network/server/)。
 
 ## 快速上手
@@ -29,6 +31,14 @@ mcpy --local --project <项目> --non-interactive stop --session <sid> --json
 - 实例（instance）是世界本身；
 - session 是一次进程运行；
 - group 是联调时的成员关系。
+
+## 通过图形界面管理
+
+运行 `mcpy ui`，在实例列表选择世界并启动；需要新存档时点击“新建实例”。游戏已在运行时使用“接管已有会话…”。
+
+<GuideCapture id="ui-hot-reload" />
+
+完整界面导览见 [图形界面 · mcpy ui](/wiki/local/gui/)。
 
 ## 判断是否就绪
 
@@ -107,6 +117,8 @@ mcpy --local --project /path/to/addon --non-interactive run --new --no-gui --det
 :::caution
 macOS 暂不支持启用最后三项（`experimental-holiday`、`experimental-biomes`、`fancy-bubbles`），显式启用会失败。不要绕过这一限制，也不要把默认的 false 当成已验证支持。
 :::
+
+<GuideCapture id="ui-world-settings" />
 
 ### 从模板导入
 

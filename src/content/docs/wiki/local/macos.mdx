@@ -5,6 +5,8 @@ sidebar:
   order: 2
 ---
 
+import GuideCapture from '../../../../components/GuideCapture.astro';
+
 mcpywrap 在 Apple Silicon macOS 上提供原生本地后端，可以运行离线 Addon 世界。日常的启动、世界复用和部署规则与 Windows 相同，见 [本地世界](/wiki/local/worlds/)；本页只说明资源安装、版本升级和平台差异。
 
 ## 快速上手
@@ -24,6 +26,12 @@ mcpy --local --non-interactive engine install --json
 ```
 
 `doctor --capabilities` 中需要有 `macos-local-worlds` 能力。`engine install` 是可选的提前准备。
+
+## 在管理器中准备资源
+
+运行 `mcpy ui`，点击顶部“运行环境”。通常保留默认来源即可；需要自定义 catalog 或导入已有 APK 时再展开高级安装选项。
+
+<GuideCapture id="ui-engine" />
 
 ## 系统要求
 

@@ -5,6 +5,8 @@ sidebar:
   order: 1
 ---
 
+import GuideCapture from '../../../../components/GuideCapture.astro';
+
 游戏会话运行起来以后，可以直接在客户端或服务端执行 Python，热更已加载的模块，或重载 JSON UI 等资源，不必重开世界。本页从一个已经存在的 session 开始；启动和找回会话见 [本地世界](/wiki/local/worlds/)。
 
 ## 快速上手
@@ -75,6 +77,12 @@ except (ImportError, AttributeError):
 
 这个探针只证明客户端已进入 HUD。服务端初始化、多人同步和玩法效果需要分别验证。
 
+## 在图形控制台中验证
+
+打开 `mcpy ui` 并接管对应会话，选择“Python / 热更”标签。先核对会话和端侧，再执行代码并读取下方输出。
+
+<GuideCapture id="ui-python" />
+
 ## 单会话热更
 
 ```sh
@@ -92,6 +100,8 @@ Python 热更的规则：
 - 单会话 `reload` 不接受 `both`。
 
 热更前仍会经过部署保护：存在未授权的其他读者，或依赖/包身份发生变化时会报错，失败不会退化为直接复制运行目录。
+
+<GuideCapture id="ui-hot-reload" />
 
 ### 持续监控
 
