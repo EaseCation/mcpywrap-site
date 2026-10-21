@@ -36,7 +36,7 @@ def main():
     args = parser.parse_args()
     base = args.base_url.rstrip('/')
     routes = {'/': 'index.html', '/wiki/': 'wiki/index.html', '/wiki': 'wiki/index.html'}
-    for path in ('start/install', 'project/dependencies', 'runtime/input'):
+    for path in ('start/install', 'start/vscode', 'project/dependencies', 'runtime/input'):
         for suffix in ('', '/'):
             routes[f'/wiki/{path}{suffix}'] = f'wiki/{path}/index.html'
     routes['/sitemap-index.xml'] = 'sitemap-index.xml'

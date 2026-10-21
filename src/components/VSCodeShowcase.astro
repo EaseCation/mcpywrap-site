@@ -1,0 +1,64 @@
+---
+import capture from '../assets/captures/vscode-hello-addon.png';
+
+const features = [
+  { icon: '≡', label: '原生日志', title: '游戏日志，就在输出面板里',
+    description: '引擎与脚本系统分流，日志实时更新并按类型染色。搜索、复制、清空与滚动锁定，都是熟悉的 VS Code 操作。', emphasis: true },
+  { icon: '>_', label: '游戏内 Python', title: '写一段代码，直接在游戏里验证',
+    description: '选择会话与客户端或服务端，执行选区或无需保存的独立草稿，在输出面板读取游戏回执。保存项目模块后，也可手动热更。', emphasis: true },
+  { icon: '{}', label: 'ModSDK 补全', title: '补全库，装到正在使用的环境里',
+    description: '确认当前文件使用的 Python 环境，安装或切换 ModSDK 补全库。配合 Pylance，在普通 Python 文件中获得 API 提示与代码跳转。', emphasis: false },
+  { icon: '▷', label: '测试工作区', title: '项目、世界与会话，一处管理',
+    description: '自动识别多项目与嵌套项目，在侧栏选择测试世界、查看会话和联调组。从编辑器右上角运行当前项目，继续测试。', emphasis: false },
+];
+---
+
+<figure class="vscode-capture" style={`--capture-width: ${capture.width / 2}px`}>
+  <a href={capture.src} target="_blank" rel="noopener" aria-label="查看 VS Code 实机原图">
+    <img src={capture.src} width={capture.width} height={capture.height}
+      alt="干净的 VS Code 工作区：左侧是 Hello Addon 项目结构，中间编写玩家位置查询组件，下方原生输出显示组件加载日志，右侧管理测试世界与游戏会话。状态栏显示已安装的 ModSDK 补全库。"
+      loading="lazy" decoding="async" />
+  </a>
+  <figcaption><span><span class="capture-dot" aria-hidden="true"></span> VS Code 实机 · Hello Addon</span><a href={capture.src} target="_blank" rel="noopener">查看原图 ↗</a></figcaption>
+</figure>
+
+<div class="vscode-features">
+  {features.map((feature) => (
+    <article class:list={['vscode-feature', { emphasis: feature.emphasis }]}>
+      <div class="feature-label"><span class="feature-icon" aria-hidden="true">{feature.icon}</span><span class="pixel">{feature.label}</span></div>
+      <h3>{feature.title}</h3>
+      <p>{feature.description}</p>
+    </article>
+  ))}
+</div>
+<div class="vscode-bottom">
+  <p>支持 Windows / Apple Silicon macOS 本机开发。扩展与 mcpy CLI 配合使用。</p>
+  <a href="https://github.com/EaseCation/mcpywrap-vscode" class="more pixel">插件源码 ↗</a>
+</div>
+
+<style>
+  .vscode-capture { max-width: var(--capture-width); margin: -20px -28px 24px; }
+  .vscode-capture > a { display: block; }
+  img { width: 100%; height: auto; display: block; }
+  figcaption { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: -3% 5% 0; position: relative; font-size: 12px; color: var(--c-text-dim); }
+  figcaption > span { display: flex; align-items: center; gap: 8px; }
+  figcaption a { text-decoration: none; }
+  .capture-dot { width: 6px; height: 6px; background: var(--c-mint); }
+  .vscode-features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .vscode-feature { padding: 22px 24px; background: var(--c-bg-1); border: 1px solid var(--c-line); box-shadow: var(--bevel); }
+  .vscode-feature.emphasis { border-top: 3px solid var(--c-teal); background: linear-gradient(135deg, rgb(40 183 166 / .07), transparent 65%), var(--c-bg-1); }
+  .feature-label { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; color: var(--c-mint); font-size: var(--px-12); }
+  .feature-icon { font: 18px/1 var(--f-code); width: 28px; color: var(--c-text-dim); }
+  .emphasis .feature-icon { color: var(--c-mint); }
+  h3 { margin: 0 0 8px; color: var(--c-prompt); font-size: 20px; line-height: 1.5; font-weight: 600; }
+  .vscode-feature p { margin: 0; color: var(--c-text-dim); font-size: 14px; line-height: 1.8; }
+  .vscode-bottom { display: flex; align-items: baseline; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; margin-top: 16px; }
+  .vscode-bottom p { margin: 0; color: var(--c-text-dim); font-size: 13px; }
+  @media (max-width: 680px) {
+    .vscode-capture { margin: -12px -10px 24px; }
+    figcaption { font-size: 11px; margin-inline: 4%; }
+    .vscode-features { grid-template-columns: minmax(0, 1fr); }
+    .vscode-feature { padding: 20px; }
+    h3 { font-size: 18px; }
+  }
+</style>
