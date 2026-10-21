@@ -205,13 +205,12 @@ export function Sky() {
   );
 }
 
-/** 全屏漂浮的像素尘埃：开发侧偏薄荷、游玩侧偏暖，缓慢上升并循环 */
+/** 全屏漂浮的像素尘埃：开发侧偏薄荷、游玩侧偏暖，缓慢上升并循环。位置在 GPU 上算，主线程每帧只更新时间 */
 export function Dust({ ctl }: { ctl: Controls }) {
   const N = 260;
-  const ref = useRef<THREE.Points>(null);
-  const { pos, base, col } = useMemo(() => {
+  const { pos, speed, col } = useMemo(() => {
     const pos = new Float32Array(N * 3);
-    const base = new Float32Array(N * 4); // x, y, z, speed
+    const speed = new Float32Array(N);
     const col = new Float32Array(N * 3);
     const mint = new THREE.Color('#70eac0');
     const acid = new THREE.Color('#7dff6a');
@@ -220,32 +219,52 @@ export function Dust({ ctl }: { ctl: Controls }) {
       const z = 6 - hash(i, 8, 1) * 26;
       const w = 30 - z * 0.7;
       const x = (hash(i, 2, 9) * 2 - 1) * w * 1.7;
-      base.set([x, (hash(i, 4, 3) * 2 - 1) * w, z, 0.3 + hash(i, 6, 5) * 0.9], i * 4);
-      const c = x < -2 ? mint : x > 2 ? warm : acid;
-      c.toArray(col, i * 3);
+      pos.set([x, (hash(i, 4, 3) * 2 - 1) * w, z], i * 3);
+      speed[i] = 0.3 + hash(i, 6, 5) * 0.9;
+      (x < -2 ? mint : x > 2 ? warm : acid).toArray(col, i * 3);
     }
-    return { pos, base, col };
+    return { pos, speed, col };
   }, []);
-  useFrame(({ clock }) => {
-    const t = ctl.reducedMotion ? 0 : clock.elapsedTime;
-    for (let i = 0; i < N; i++) {
-      const [x, y, z, sp] = [base[i * 4], base[i * 4 + 1], base[i * 4 + 2], base[i * 4 + 3]];
-      const h = 30 - z * 0.7;
-      let yy = y + t * sp;
-      yy = ((((yy + h) % (2 * h)) + 2 * h) % (2 * h)) - h;
-      pos[i * 3] = x + Math.sin(t * 0.3 + i) * 0.6;
-      pos[i * 3 + 1] = yy;
-      pos[i * 3 + 2] = z;
-    }
-    (ref.current!.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true;
+  const material = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        uniforms: { uTime: { value: 0 }, uSize: { value: 3 } },
+        vertexShader: /* glsl */ `
+          attribute float aSpeed;
+          attribute vec3 color;
+          uniform float uTime;
+          uniform float uSize;
+          varying vec3 vColor;
+          void main() {
+            float h = 30.0 - position.z * 0.7;
+            float y = mod(position.y + uTime * aSpeed + h, 2.0 * h) - h;
+            float x = position.x + sin(uTime * 0.3 + aSpeed * 50.0) * 0.6;
+            vColor = color;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(x, y, position.z, 1.0);
+            gl_PointSize = uSize;
+          }`,
+        fragmentShader: /* glsl */ `
+          varying vec3 vColor;
+          void main() {
+            gl_FragColor = vec4(vColor, 0.55);
+            #include <colorspace_fragment>
+          }`,
+      }),
+    [],
+  );
+  useFrame(({ clock, gl }) => {
+    material.uniforms.uTime.value = ctl.reducedMotion ? 0 : clock.elapsedTime;
+    material.uniforms.uSize.value = 3 * gl.getPixelRatio();
   });
   return (
-    <points ref={ref} frustumCulled={false}>
+    <points frustumCulled={false} material={material}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[pos, 3]} />
+        <bufferAttribute attach="attributes-aSpeed" args={[speed, 1]} />
         <bufferAttribute attach="attributes-color" args={[col, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={3} sizeAttenuation={false} vertexColors transparent opacity={0.55} depthWrite={false} toneMapped={false} />
     </points>
   );
 }

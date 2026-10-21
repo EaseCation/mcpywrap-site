@@ -8,7 +8,7 @@ export default function Stage({ ctl, running, onReady }: { ctl: Controls; runnin
     <Canvas
       className="pcanvas"
       frameloop={running ? 'always' : 'never'}
-      dpr={[1, 1.5]}
+      dpr={[1, 1.25]}
       camera={{ fov: 32, position: [0, 0.6, 36], near: 1, far: 200 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       onCreated={({ gl }) => {

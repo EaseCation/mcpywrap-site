@@ -49,30 +49,28 @@ export function seamDistance(n: [number, number, number], shape: SeamShape) {
 export function buildWorld(shape: SeamShape): Voxel[] {
   const out: Voxel[] = [];
   const r = R + 0.5;
+  const inside = (x: number, y: number, z: number) => Math.hypot(x, y, z) <= r;
   for (let x = -R - 1; x <= R + 1; x++)
     for (let y = -R - 1; y <= R + 1; y++)
       for (let z = -R - 1; z <= R + 1; z++) {
+        if (!inside(x, y, z)) continue;
+        // 只保留表面：至少一个六邻格在球外。单层、无孔洞，内部不渲染
+        const surface =
+          !inside(x + 1, y, z) || !inside(x - 1, y, z) || !inside(x, y + 1, z) ||
+          !inside(x, y - 1, z) || !inside(x, y, z + 1) || !inside(x, y, z - 1);
+        if (!surface) continue;
         const len = Math.hypot(x, y, z);
-        if (len > r || len < r - 1.6) continue;
         const n: [number, number, number] = [x / len, y / len, z / len];
         const d = seamDistance(n, shape);
         const seed = hash(x, y, z);
-        out.push({
-          x,
-          y,
-          z,
-          n,
-          d,
-          seed,
-          hover: seed > 0.72 ? 0.35 + (seed - 0.72) * 2.4 : 0,
-          hill: false,
-        });
+        // 只有交界线附近一小簇开发块浮起：表示"即将落入世界的代码"
+        const hover = d < -0.06 && d > -0.42 && seed > 0.86 ? 0.45 + (seed - 0.86) * 3 : 0;
+        out.push({ x, y, z, n, d, seed, hover, hill: false });
       }
   // 游玩侧加几座方块山丘（只在外层上方加一格），保持抽象、数量少
   const extra: Voxel[] = [];
   for (const v of out) {
-    const len = Math.hypot(v.x, v.y, v.z);
-    if (len < r - 0.9 || v.d < 0.25) continue;
+    if (v.d < 0.25) continue;
     if (hash(v.x + 31, v.y - 17, v.z + 5) > 0.86) {
       const nx = Math.round(v.x + v.n[0]);
       const ny = Math.round(v.y + v.n[1]);

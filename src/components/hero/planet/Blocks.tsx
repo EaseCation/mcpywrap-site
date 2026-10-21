@@ -45,6 +45,10 @@ export function Blocks({ ctl, atlas, shape, introStart }: Props) {
     [voxels],
   );
 
+  const maxDelay = useMemo(() => delays.reduce((m, d) => (Number.isFinite(d) ? Math.max(m, d) : m), 0), [delays]);
+  const settling = useRef(true);
+  const lastLens = useRef('');
+
   useLayoutEffect(() => {
     const m = new THREE.Matrix4();
     voxels.forEach((v, i) => mesh.current!.setMatrixAt(i, m.makeTranslation(v.x, v.y, v.z)));
@@ -60,19 +64,26 @@ export function Blocks({ ctl, atlas, shape, introStart }: Props) {
     const arr = play.array as Float32Array;
     const intro = ctl.skipIntro ? Infinity : t - introStart.current;
     const lens = ctl.dragging ? null : ctl.lens;
-    const step = ctl.reducedMotion ? 1 : Math.min(dt, 0.05) * FLIP_SPEED;
-    let dirty = false;
-    for (let i = 0; i < count; i++) {
-      const v = voxels[i];
-      let target = intro >= delays[i] ? 1 : 0;
-      if (lens && lens.x * v.n[0] + lens.y * v.n[1] + lens.z * v.n[2] > LENS_COS) target = 1 - target;
-      const cur = arr[i];
-      if (cur !== target) {
-        arr[i] = cur < target ? Math.min(target, cur + step) : Math.max(target, cur - step);
-        dirty = true;
+    // 静止时（开场结束、透视镜没动、没有方块在翻转）跳过逐块计算
+    const lensKey = lens ? `${lens.x.toFixed(3)},${lens.y.toFixed(3)},${lens.z.toFixed(3)}` : '';
+    const introDone = intro > maxDelay + 1;
+    if (settling.current || !introDone || lensKey !== lastLens.current) {
+      lastLens.current = lensKey;
+      const step = ctl.reducedMotion ? 1 : Math.min(dt, 0.05) * FLIP_SPEED;
+      let moving = false;
+      for (let i = 0; i < count; i++) {
+        const v = voxels[i];
+        let target = intro >= delays[i] ? 1 : 0;
+        if (lens && lens.x * v.n[0] + lens.y * v.n[1] + lens.z * v.n[2] > LENS_COS) target = 1 - target;
+        const cur = arr[i];
+        if (cur !== target) {
+          arr[i] = cur < target ? Math.min(target, cur + step) : Math.max(target, cur - step);
+          moving = true;
+        }
       }
+      settling.current = moving;
+      if (moving) play.needsUpdate = true;
     }
-    if (dirty) play.needsUpdate = true;
 
     // MC 式选中框
     const o = outline.current!;
@@ -81,7 +92,7 @@ export function Blocks({ ctl, atlas, shape, introStart }: Props) {
       const p = arr[ctl.hoverId];
       const lift = (1 - p) * (v.d < 0 ? v.hover : 0) + Math.sin(p * Math.PI) * 0.35;
       o.position.set(v.x + v.n[0] * lift, v.y + v.n[1] * lift, v.z + v.n[2] * lift);
-      o.scale.setScalar(THREE.MathUtils.lerp(0.78, 1, p));
+      o.scale.setScalar(1 - Math.sin(p * Math.PI) * 0.18);
       o.visible = true;
     } else o.visible = false;
   });
