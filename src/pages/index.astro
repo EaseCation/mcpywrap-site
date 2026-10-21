@@ -5,7 +5,7 @@ import Hero from '../components/hero/Hero.astro';
 import Section from '../components/Section.astro';
 import CommandDemo from '../components/demo/CommandDemo.astro';
 import Code from '../components/Code.astro';
-import RealRun from '../components/RealRun.astro';
+import MacOSCapture from '../components/MacOSCapture.astro';
 import '../styles/sections.css';
 
 const pains = [
@@ -13,14 +13,15 @@ const pains = [
   ['没有包管理，公共代码靠复制粘贴', 'pyproject.toml 声明依赖，Git 依赖锁定提交，克隆后 mcpy sync 即恢复'],
   ['官方开发环境只支持 Windows', 'Apple Silicon Mac 原生运行本地 Addon 世界，首次运行自动准备资源'],
   ['每次测试都要手动进游戏点', 'AI 可以自己启动游戏、执行游戏内 Python、操作玩家与 UI、截图、热更'],
-  ['资源预生成、表格转 JSON 只能手工跑', '生命周期脚本在构建、打包、启动前自动执行（0.5.0+）'],
+  ['资源预生成、表格转 JSON 只能手工跑', '生命周期脚本在构建、打包、启动前自动执行'],
   ['服务端开发缺少能自动化的客户端', 'mcpy connect 连接指定服务器，复用会话、Python、输入与截图'],
 ];
 
-const depsToml = `[[tool.mcpywrap.git_dependencies]]
-name = "shared"
-git = "<仓库 URL>"
-rev = "<首次添加时锁定的完整提交 SHA>"`;
+const depsExample = `商店玩法组件：商品、购买流程
+  ↓ 依赖
+经济前置组件：金币余额、扣款
+  ↓ 依赖
+QuMod：玩法开发框架`;
 
 const hooksToml = `[tool.mcpywrap.scripts.assets]
 python = "tools/assets.py"
@@ -34,7 +35,7 @@ before_run = ["assets"]`;
 
 const hookTable = [
   ['build', 'before_build 一次，然后组装'],
-  ['package', 'before_package 一次，组装后可接 before_archive（0.5.3+）'],
+  ['package', 'before_package 一次，组装后可接 before_archive'],
   ['dev', '首次构建前 before_build 一次'],
   ['本地 run / restart', '真正准备新游戏进程时 before_run 一次'],
   ['runtime reload、connect、远程 run', '不执行'],
@@ -44,11 +45,18 @@ const serverToml = `[tool.mcpywrap.server]
 host = "127.0.0.1"
 port = 19132`;
 
-const macRows: [string, string][] = [
-  ['本地 Addon 世界与世界参数', 'Map 本地运行'],
-  ['client / server Python、热更、JSON UI 重载', '录屏、视频提帧、原始桌面键鼠'],
-  ['统一输入、后台截图', 'MCEditor、MCS 登录身份'],
-  ['无认证服务器连接', '本地主客机双客户端'],
+const platformRows: [string, boolean, boolean][] = [
+  ['依赖管理、构建与打包', true, true],
+  ['本地 Addon 世界与世界参数', true, true],
+  ['client / server Python、热更与 JSON UI 重载', true, true],
+  ['统一输入与后台截图', true, true],
+  ['连接无认证服务器', true, true],
+  ['项目界面与日志小窗', true, true],
+  ['Map 本地运行', true, false],
+  ['录屏与视频提帧', true, false],
+  ['原始桌面键鼠', true, false],
+  ['MCEditor 与 MCS 登录身份', true, false],
+  ['本地主客机双客户端', true, false],
 ];
 
 const cards = [
@@ -124,7 +132,6 @@ mcpy run`;
       </p>
     </Fragment>
     <CommandDemo id="ai" />
-    <RealRun />
     <ul class="facts">
       <li><b class="pixel">256 步 / 120 秒</b><span>单个输入计划上限，步骤可带断言，request_id 保证幂等</span></li>
       <li><b class="pixel">client · server</b><span>游戏内 Python 两端都能执行，结果分 completed / unavailable / failed / unknown</span></li>
@@ -139,20 +146,20 @@ mcpy run`;
   <Section id="deps" index="03" kicker="依赖管理" title="像普通 Python 项目一样管理 Mod 依赖">
     <Fragment slot="lead">
       <p>
-        在 <code>pyproject.toml</code> 里声明本地 Addon、Git 仓库和 QuMod。Git 依赖锁定到提交，递归处理子依赖；团队成员克隆后一条
-        <code>mcpy sync</code> 恢复全部框架。
+        在项目中声明需要的前置组件和开发框架，统一管理本地 Addon、Git 依赖和 QuMod。
+        添加时固定所用的代码提交，队友克隆项目后用 <code>mcpy sync</code> 恢复同一套依赖，打包时自动组装代码与资源。
       </p>
     </Fragment>
     <CommandDemo id="deps" />
     <div class="split">
-      <Code code={depsToml} lang="toml" title="pyproject.toml" />
+      <Code code={depsExample} title="示例：一个商店玩法的组件组合" />
       <div class="callout warn">
-        <p class="pixel">注意：Python 包只进开发环境</p>
+        <p class="pixel">游戏前置，要作为组件加入</p>
         <p>
-          <code>mcpy add "package&gt;=1.0"</code> 只把包装进 mcpy 的工具环境。游戏使用内置 Python，不读取
-          dependencies，也不继承 site-packages；游戏需要的代码必须随 Addon 携带。包内的 .pyd / .dll / .so / .dylib
-          原生二进制会阻止构建和启动。
+          这里假设经济 Addon 本身基于 QuMod，并在配置中声明了这项依赖；玩法项目只需加入经济组件。
+          <code>mcpy add package-name</code> 安装的普通 Python 包只供开发工具使用，不会自动进入游戏。
         </p>
+        <a class="more pixel" href="/wiki/project/dependencies/">依赖与 QuMod 说明 →</a>
       </div>
     </div>
   </Section>
@@ -160,30 +167,41 @@ mcpy run`;
   <Section id="macos" index="04" kicker="macOS 原生" title="Mac 上也能跑中国版 Addon 测试" tone="seam">
     <Fragment slot="lead">
       <p>
-        Apple Silicon、macOS 13.0+。首次 <code>run</code> 自动下载原生运行包和开发者 APK，不需要 Wine、Windows 虚拟机或另一套
-        Launcher。截图直接读取游戏渲染帧，不需要屏幕录制授权。
+        ARM64 + Metal 原生运行：游戏直接运行在 Apple Silicon 上，使用 Metal 图形后端，无需 CPU 指令转译、Wine 或 Windows 虚拟机。
+        支持 macOS 13.0+，首次 <code>run</code> 自动准备原生运行包与开发者 APK。后台截图直接读取游戏渲染帧，无需屏幕录制授权。
       </p>
     </Fragment>
-    <CommandDemo id="macos" />
-    <table class="captable">
-      <caption class="pixel">macOS 能力表（如实列出）</caption>
+    <MacOSCapture />
+    <table class="captable platform-comparison">
+      <caption class="pixel">Windows 与 macOS 功能对比</caption>
+      <colgroup><col class="feature-col" /><col /><col /></colgroup>
       <thead>
-        <tr><th scope="col">支持</th><th scope="col">暂不支持</th></tr>
+        <tr><th scope="col">功能</th><th scope="col">Windows</th><th scope="col">macOS</th></tr>
       </thead>
       <tbody>
         {
-          macRows.map(([a, b]) => (
+          platformRows.map(([feature, windows, macos]) => (
             <tr>
-              <td><span class="yes" aria-hidden="true">✓</span>{a}</td>
-              <td><span class="no" aria-hidden="true">×</span>{b}</td>
+              <th scope="row">{feature}</th>
+              {[windows, macos].map((supported) => (
+                <td>
+                  <span class={`platform-status ${supported ? 'supported' : 'unsupported'}`}>
+                    <span aria-hidden="true">{supported ? '✓' : '×'}</span>
+                    {supported ? '支持' : '暂不支持'}
+                  </span>
+                </td>
+              ))}
             </tr>
           ))
         }
       </tbody>
     </table>
+    <p class="note">
+      以上对比本机能力，本地主客机联调需手动加入局域网世界。跨平台远程操作见 <a href="/wiki/network/remote/">远程执行</a>。
+    </p>
   </Section>
 
-  <Section id="scripts" index="05" kicker="生命周期脚本 · 0.5.0+" title="构建前，先把资源生成好">
+  <Section id="scripts" index="05" kicker="生命周期脚本" title="构建前，先把资源生成好">
     <Fragment slot="lead">
       <p>
         在构建、打包、启动前自动运行项目自己的生成器：策划表转 JSON、处理贴图、校验资源。脚本在宿主机运行，失败或超时会中断本次操作。
@@ -210,7 +228,7 @@ mcpy run`;
       </table>
     </div>
     <p class="note">
-      脚本可读取 MCPY_PROJECT_ROOT、MCPY_EVENT、MCPY_OPERATION。0.5.2 起，框架依赖还能通过 consumer_prepare
+      脚本可读取 MCPY_PROJECT_ROOT、MCPY_EVENT、MCPY_OPERATION。框架依赖还能通过 consumer_prepare
       带着自己的工具处理消费项目的素材。脚本对源码的写入不会自动回滚。
     </p>
   </Section>
@@ -284,7 +302,7 @@ mcpy run`;
       <li><b class="pixel">MIT</b><span>EaseCation 开源维护</span></li>
       <li><b class="pixel">PyPI</b><span>GitHub Actions 可信发布</span></li>
       <li><b class="pixel">800+</b><span>个自动化测试</span></li>
-      <li><b class="pixel">0.5.4</b><span>当前版本</span></li>
+      <li><b class="pixel">双平台</b><span>Windows · Apple Silicon macOS</span></li>
     </ul>
     <p class="links-row">
       <a class="pixel" href="https://github.com/EaseCation/mcpywrap">GitHub</a>

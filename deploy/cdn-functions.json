@@ -1,0 +1,110 @@
+[
+  {
+    "functionName": "oss_auth",
+    "functionArgs": [
+      {
+        "argName": "oss_bucket_id",
+        "argValue": "easecation-mcpywrap-site.oss-cn-hangzhou.aliyuncs.com"
+      }
+    ]
+  },
+  {
+    "functionName": "l2_oss_key",
+    "functionArgs": [
+      {
+        "argName": "private_oss_auth",
+        "argValue": "on"
+      }
+    ]
+  },
+  {
+    "functionName": "set_req_host_header",
+    "functionArgs": [
+      {
+        "argName": "domain_name",
+        "argValue": "easecation-mcpywrap-site.oss-cn-hangzhou.aliyuncs.com"
+      }
+    ]
+  },
+  {
+    "functionName": "back_to_origin_url_rewrite",
+    "functionArgs": [
+      {
+        "argName": "source_url",
+        "argValue": "^/$"
+      },
+      {
+        "argName": "target_url",
+        "argValue": "/index.html"
+      },
+      {
+        "argName": "sequence",
+        "argValue": "1"
+      }
+    ]
+  },
+  {
+    "functionName": "back_to_origin_url_rewrite",
+    "functionArgs": [
+      {
+        "argName": "source_url",
+        "argValue": "^/(.+)/$"
+      },
+      {
+        "argName": "target_url",
+        "argValue": "/$1/index.html"
+      },
+      {
+        "argName": "sequence",
+        "argValue": "2"
+      }
+    ]
+  },
+  {
+    "functionName": "back_to_origin_url_rewrite",
+    "functionArgs": [
+      {
+        "argName": "source_url",
+        "argValue": "^/([^.?]+[^/])$"
+      },
+      {
+        "argName": "target_url",
+        "argValue": "/$1/index.html"
+      },
+      {
+        "argName": "sequence",
+        "argValue": "3"
+      }
+    ]
+  },
+  {
+    "functionName": "https_tls_version",
+    "functionArgs": [
+      {
+        "argName": "tls10",
+        "argValue": "off"
+      },
+      {
+        "argName": "tls11",
+        "argValue": "off"
+      },
+      {
+        "argName": "tls12",
+        "argValue": "on"
+      },
+      {
+        "argName": "tls13",
+        "argValue": "on"
+      }
+    ]
+  },
+  {
+    "functionName": "https_force",
+    "functionArgs": [
+      {
+        "argName": "enable",
+        "argValue": "on"
+      }
+    ]
+  }
+]

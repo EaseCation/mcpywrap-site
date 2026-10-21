@@ -32,6 +32,8 @@ export default function Planet({ capabilities }: { capabilities: Capability[] })
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState<Capability | null>(null);
   const [copied, setCopied] = useState(false);
+  const activeRef = useRef<Capability | null>(null);
+  activeRef.current = active;
 
   const ctl = useMemo<Controls | null>(() => {
     if (typeof window === 'undefined') return null;
@@ -150,8 +152,14 @@ export default function Planet({ capabilities }: { capabilities: Capability[] })
       if (now() - (last?.t ?? 0) > 0.08) ctl.vel.set(0, 0);
       last = null;
       if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
-      // 点击空白处收起卡片
-      if (moved < 4) focus(null);
+      if (moved >= 4) return;
+      // 没有拖动 = 点击：有卡片时先收起卡片，否则交给场景检测点中了哪个方块
+      if (activeRef.current) focus(null);
+      else {
+        ndc(e);
+        ctl.tap = ctl.pointer.clone();
+        el.dataset.used = '';
+      }
     };
     const leave = () => {
       ctl.hovering = false;
@@ -227,10 +235,16 @@ export default function Planet({ capabilities }: { capabilities: Capability[] })
             {c.name}
           </button>
         ))}
+        <span ref={anchorRef('ripple')} className="ptap pixel">
+          <span />
+        </span>
         {Array.from({ length: AGENT_COUNT }, (_, i) => (
           <span key={i} ref={anchorRef(`agent-${i}`)} className="ptag pixel" />
         ))}
       </div>
+      <p className="phint pixel" aria-hidden="true">
+        拖动旋转 · 点击方块运行一条命令
+      </p>
       {active && (
         <div className="pcard" role="dialog" aria-label={active.name}>
           <div className="pcard-head">

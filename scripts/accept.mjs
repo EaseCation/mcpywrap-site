@@ -45,7 +45,7 @@ const browser = await chromium.launch();
   const names = seen.map((s) => s.t);
   check('Tab 到达 uv 标签', names.includes('uv'));
   check('Tab 到达复制按钮', names.some((n) => n.startsWith('复制安装命令')));
-  check('Tab 到达"交给 AI"', names.includes('交给 AI'));
+  check('Tab 到达"快速开始"', names.includes('快速开始'));
   check('焦点样式可见', seen.every((s) => s.o !== 'none'), seen.filter((s) => s.o === 'none').map((s) => s.t).join(','));
   await page.close();
 }
@@ -97,6 +97,50 @@ const browser = await chromium.launch();
   await page.keyboard.press('Escape');
   check('Esc 关闭卡片', (await page.locator('.pcard').count()) === 0);
   await page.close();
+}
+
+// 5b. 点击方块：开发半球不能被整片翻成游玩态（回归：跳过开场时曾把开发侧全部翻成泥土）；点击处弹出命令
+{
+  // 左半球开发态像素（薄荷/深蓝）与游玩态像素（草/土）的比例
+  const devVsPlay = async (page) => {
+    const box = await page.locator('[data-planet-wrap]').boundingBox();
+    const buf = await page.screenshot({ clip: { x: box.x, y: box.y, width: box.width / 2, height: box.height } });
+    return page.evaluate(async (b64) => {
+      const img = new Image();
+      img.src = 'data:image/png;base64,' + b64;
+      await img.decode();
+      const c = document.createElement('canvas');
+      c.width = img.width;
+      c.height = img.height;
+      const x = c.getContext('2d');
+      x.drawImage(img, 0, 0);
+      const d = x.getImageData(0, 0, c.width, c.height).data;
+      let dev = 0, play = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        const [r, g, b] = [d[i], d[i + 1], d[i + 2]];
+        if (b > r * 1.3 && b > 20 && g > r) dev++; // 深蓝面与薄荷格线
+        else if ((g > r * 1.15 && g > b * 1.4 && g > 60) || (r > g && g > b && r > 70)) play++;
+      }
+      return { dev, play };
+    }, buf.toString('base64'));
+  };
+  for (const reduced of [false, true]) {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: reduced ? 'reduce' : 'no-preference' });
+    const page = await ctx.newPage();
+    await page.goto(BASE + '/?seam=line', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(3500);
+    const box = await page.locator('[data-planet-wrap]').boundingBox();
+    // 点击开发半球（左侧）上的一个方块
+    await page.mouse.click(box.x + box.width * 0.36, box.y + box.height * 0.5);
+    await page.waitForTimeout(400);
+    const tag = (await page.locator('.ptap').textContent()) ?? '';
+    await page.waitForTimeout(3500); // 等波纹结束
+    const r = await devVsPlay(page);
+    const label = reduced ? '（减少动态）' : '';
+    check(`点击后开发半球保持开发态${label}`, r.dev > r.play * 2, JSON.stringify(r));
+    check(`点击方块弹出命令${label}`, tag.includes('mcpy'), JSON.stringify(tag));
+    await ctx.close();
+  }
 }
 
 // 6. 各页面无横向溢出、无运行时报错

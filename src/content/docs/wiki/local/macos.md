@@ -5,8 +5,6 @@ sidebar:
   order: 2
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 mcpywrap 在 Apple Silicon macOS 上提供原生本地后端，可以运行离线 Addon 世界。日常的启动、世界复用和部署规则与 Windows 相同，见 [本地世界](/wiki/local/worlds/)；本页只说明资源安装、版本升级和平台差异。
 
 ## 快速上手
@@ -30,7 +28,7 @@ mcpy --local --non-interactive engine install --json
 ## 系统要求
 
 - Apple Silicon Mac。Intel Mac 不支持原生本地后端；Apple Silicon 上的 Rosetta Python 可以启动 arm64 游戏。
-- 最低声明 macOS 13.0。已记录的游戏实测系统为 26.6.2。
+- 最低声明 macOS 13.0。实测过的系统与开发包版本见 [更新记录](https://github.com/EaseCation/mcpywrap/blob/main/CHANGELOG.md)。
 - 运行包采用 ad-hoc 签名，未公证，因此不能保证最低系统版本和 Gatekeeper 检查全部通过。
 - 不需要 Wine、Homebrew 游戏环境、MPay 账号，也不需要另装一套 Launcher。
 
@@ -58,13 +56,13 @@ mcpy --local engine check-updates --json
 
 这个命令只查询网易 pe/pe_old 的真实版本和 URL，不下载、不替换实例。返回 `compatibility=not_checked` 不代表可以运行。首次安装已经会查询 pe，普通启动不需要先检查更新。
 
-CLI 0.5.1 默认使用运行包 0.4.5，包含原生游戏截图。已有安装会保留所选来源，升级资源时需要明确指定：
+新版 CLI 默认使用随之发布的运行包。已有安装会保留所选来源，升级资源时需要用 `--catalog` 明确指定新运行包的 catalog（地址见 [mcpelauncher-manifest 发布页](https://github.com/EaseCation/mcpelauncher-manifest/releases)）：
 
 ```sh
-mcpy --local --non-interactive engine install --catalog https://github.com/EaseCation/mcpelauncher-manifest/releases/download/mcpy-runtime-v0.4.5/catalog.json --json
+mcpy --local --non-interactive engine install --catalog <运行包 catalog.json 地址> --json
 ```
 
-这个 catalog 仍按其来源规则发现 APK，并不等于固定旧 APK。旧版本如果已不在官方频道，就无法下载，此时报告缺失，不要猜 URL。更新 CLI/Skill 或重新 `runtime install` 都不能替换原生包。
+catalog 仍按其来源规则发现 APK，并不等于固定旧 APK。旧版本如果已不在官方频道，就无法下载，此时报告缺失，不要猜 URL。更新 CLI/Skill 或重新 `runtime install` 都不能替换原生包。
 
 ## 平台能力边界
 
@@ -73,26 +71,26 @@ mcpy --local --non-interactive engine install --catalog https://github.com/EaseC
 | 本地世界 | 支持 Addon；Map 尚未接入。Map 需要 Windows 本地运行，远程服务不提供世界实例 |
 | 世界参数 | 运行包需 `cppconfig_protocol=1`，选项见 [本地世界](/wiki/local/worlds/) |
 | 游戏 Python | 本地 client/server；客户端队列需 `python.client_queue`，见 [运行时调试](/wiki/runtime/debug/) |
-| 无认证网络 | 运行包 0.4.3+ 且 `network_connect_protocol=1`；服务器须允许开发客户端 |
+| 无认证网络 | 运行包需 `network_connect_protocol=1`；服务器须允许开发客户端 |
 | 本地主客机 | 尚不支持；缺少 `local-dual-client-manual` 时启动前即拒绝 |
-| 双外服客户端 | 需要支持独立开发身份协议的原生包；做过候选实验不代表公开的 0.4.5 已具备 |
+| 双外服客户端 | 需要支持独立开发身份协议的原生包；以实例诊断为准，不能凭候选实验推断已具备 |
 | MCS 身份 / MCEditor | macOS 不支持；MCS 网络身份可由 Windows 服务提供，编辑器必须在 Windows 本机 |
 | 游戏截图 | 实例运行包需 `screenshot_protocol=1`，见 [截图与录屏](/wiki/runtime/capture/) |
 | 录屏 / 视频提帧 / 原始设备输入 | macOS 本地不支持；可通过远程针对 Windows 会话使用 |
 
-网络连接时，CLI 0.4.3+ 需与运行包 0.4.3+ 配套，旧的 0.4.0 运行包要显式升级。网络会话只支持客户端调试，不装配本地 Mod，使用方法见 [连接服务器](/wiki/network/server/)。
+网络连接需要 CLI 与运行包都支持网络协议，旧运行包要显式升级。网络会话只支持客户端调试，不装配本地 Mod，使用方法见 [连接服务器](/wiki/network/server/)。
 
 :::caution
-3.10.100.299889 曾在本机允许无认证的 Nemisys/SynapseAPI/Nukkit 测试栈上验证进服，这不能推及公开服务器。当前网络运行包对外 HTTP 资源包下载尚未完成验收，需要这类分发时不能视为完整支持。
+进服验证是在本机允许无认证的 Nemisys/SynapseAPI/Nukkit 测试栈上做的，不能推及公开服务器。当前网络运行包对外 HTTP 资源包下载尚未完成验收，需要这类分发时不能视为完整支持。
 :::
 
 具体能力以所选运行包和当前实例的诊断为准。
 
 ## 游戏输入与资源重载
 
-- 运行包 0.4.4 提供单调时钟，目标会话应报告 `clock_source=launcher.steady_clock`。旧包返回 `missing_monotonic_clock` 时需要明确升级并新建实例，不能换成 CPU/墙钟或旧输入协议。输入用法见 [统一输入](/wiki/runtime/input/)。
-- 输入计时、移动跳跃、取消释放、攻击、聊天和 UI 点击已在 26.6.2 / 开发包 3.9.100.297020 上验证。3.10.100.299889 的时钟适配只做了结构检查，不等同于游戏输入实测。
-- JSON UI 重载需要 `json_ui_reload_protocol=1`，旧包上 Ctrl+R 无效。重载后要重新创建业务界面和回调，不能依赖 `UiInitFinished` 自动重建。3.9.100.297020 与 3.10.100.299889 已有定义重载验证，新文件和复杂继承仍需单独确认。
+- 统一输入需要运行包提供单调时钟，目标会话应报告 `clock_source=launcher.steady_clock`。旧包返回 `missing_monotonic_clock` 时需要明确升级并新建实例，不能换成 CPU/墙钟或旧输入协议。输入用法见 [统一输入](/wiki/runtime/input/)。
+- 输入与重载在哪些开发包版本上做过实测，见 [更新记录](https://github.com/EaseCation/mcpywrap/blob/main/CHANGELOG.md)；未列出的版本以实例诊断和实际观察为准。
+- JSON UI 重载需要 `json_ui_reload_protocol=1`，旧包上 Ctrl+R 无效。重载后要重新创建业务界面和回调，不能依赖 `UiInitFinished` 自动重建。新文件和复杂继承需要单独确认。
 - 已有的微软粒子文件更新后，检查新建的发射器；新增粒子可能需要重开世界。Material/Metal Shader 当前返回 `unsupported`，不要通过宽泛的资源刷新接口绕过。
 - 原生结构预检失败返回 `unsupported_engine_structure`；JSON UI 局部定位失败时可以只关闭该能力。发现新 APK 不会自动启用未验证的资源接口。
 

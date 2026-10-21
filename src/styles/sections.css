@@ -138,6 +138,51 @@
 .captable th + th {
   border-left: 2px solid var(--c-bg-2);
 }
+.platform-comparison {
+  table-layout: fixed;
+}
+.platform-comparison col {
+  width: 28%;
+}
+.platform-comparison .feature-col {
+  width: 44%;
+}
+.platform-comparison thead th:not(:first-child),
+.platform-comparison td {
+  text-align: center;
+}
+.platform-comparison tbody th {
+  font: inherit;
+  color: var(--c-text);
+  vertical-align: middle;
+  border-bottom-width: 1px;
+}
+.platform-comparison td {
+  vertical-align: middle;
+  border-left: 2px solid var(--c-bg-2);
+}
+.platform-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.platform-status.supported {
+  color: var(--c-mint);
+}
+.platform-status.unsupported {
+  color: var(--c-text-dim);
+}
+.platform-status.unsupported > span {
+  color: var(--c-heart);
+}
+@media (max-width: 600px) {
+  .platform-comparison th,
+  .platform-comparison td {
+    padding: 10px 6px;
+  }
+}
 .yes,
 .no {
   display: inline-block;

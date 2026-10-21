@@ -30,6 +30,10 @@ export interface Controls {
   anchors: Map<string, HTMLElement>;
   /** 跟随 3D 物体的锚点（Agent、卫星），key 与 anchors 对应 */
   objects: Map<string, THREE.Object3D>;
+  /** 待处理的点击（NDC），场景在下一帧射线检测后清空；null 表示没有 */
+  tap: THREE.Vector2 | null;
+  /** 正在扩散的点击波纹：起点方向（星球局部单位向量）与开始时间（场景时钟秒，-1 表示下一帧开始） */
+  ripples: { dir: THREE.Vector3; t0: number }[];
   /** 星球在画布中的位置与尺寸（像素，相对画布左上角）：中心 x/y 与边长 */
   frame: { x: number; y: number; size: number };
   /** 开场进度 0..1，DOM 层用来淡入徽章 */
@@ -54,6 +58,8 @@ export function createControls(seam: SeamShape, reducedMotion: boolean): Control
     hoverId: -1,
     anchors: new Map(),
     objects: new Map(),
+    tap: null,
+    ripples: [],
     frame: { x: 0, y: 0, size: 0 },
     reveal: reducedMotion ? 1 : 0,
   };

@@ -1,0 +1,27 @@
+{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:ListObjects",
+        "oss:GetBucketInfo"
+      ],
+      "Resource": "acs:oss:*:1083406401917880:easecation-mcpywrap-site"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:GetObject",
+        "oss:PutObject",
+        "oss:DeleteObject"
+      ],
+      "Resource": "acs:oss:*:1083406401917880:easecation-mcpywrap-site/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "cdn:RefreshObjectCaches",
+      "Resource": "acs:cdn:*:1083406401917880:domain/mcpy.easecation.net"
+    }
+  ]
+}

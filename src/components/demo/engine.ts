@@ -11,6 +11,8 @@ export class Stage {
   layer: HTMLElement;
   token = 0;
   instant = false;
+  private owner: Stage = this;
+  private runToken = 0;
 
   constructor(public root: HTMLElement) {
     root.style.setProperty('--cols', String(COLS));
@@ -28,6 +30,19 @@ export class Stage {
     root.append(grid, this.layer);
   }
 
+  /** 每次播放使用独立的取消标识与速度，旧动画不能写入新画面。 */
+  forRun(instant: boolean): Stage {
+    const run = Object.create(this) as Stage;
+    run.owner = this;
+    run.runToken = this.token;
+    run.instant = instant;
+    return run;
+  }
+
+  checkpoint() {
+    if (this.owner !== this && this.owner.token !== this.runToken) throw new Error('cancelled');
+  }
+
   /** 清空舞台，并取消正在进行的动画 */
   reset() {
     this.token++;
@@ -36,11 +51,13 @@ export class Stage {
 
   /** 只清空画面（场景内部换景用） */
   clear() {
+    this.checkpoint();
     this.cells.forEach((c) => (c.dataset.s = 'empty'));
     this.layer.replaceChildren();
   }
 
   set(x: number, y: number, s: Cell) {
+    this.checkpoint();
     const c = this.cells[y * COLS + x];
     if (c) c.dataset.s = s;
   }
@@ -51,14 +68,15 @@ export class Stage {
 
   /** 等待；被新的播放打断时抛出，瞬间模式直接返回 */
   async wait(ms: number) {
+    this.checkpoint();
     if (this.instant) return;
-    const t = this.token;
     await new Promise((r) => setTimeout(r, ms));
-    if (t !== this.token) throw new Error('cancelled');
+    this.checkpoint();
   }
 
   /** 在格子坐标处放一个叠加元素 */
   put(cls: string, x: number, y: number, html = '', w = 1, h = 1) {
+    this.checkpoint();
     const el = document.createElement('div');
     el.className = `o ${cls}`;
     this.move(el, x, y);
@@ -70,6 +88,7 @@ export class Stage {
   }
 
   move(el: HTMLElement, x: number, y: number) {
+    this.checkpoint();
     el.style.setProperty('--x', String(x));
     el.style.setProperty('--y', String(y));
   }
@@ -80,6 +99,7 @@ export class Stage {
 
   /** 短暂闪光一个元素或格子 */
   pulse(el: HTMLElement) {
+    this.checkpoint();
     el.classList.remove('pulse');
     void el.offsetWidth;
     el.classList.add('pulse');
@@ -104,29 +124,19 @@ async function buildGround(s: Stage, x0 = 0, x1 = COLS - 1) {
 const player = (s: Stage, x: number) => s.find('player') ?? s.put('player', x, GROUND - 2, '<b></b><b></b><b></b>', 1, 2);
 const chip = (s: Stage, text: string, x: number, y: number, cls = '') => s.put(`chip ${cls}`, x, y, text);
 
-/** 开发侧小项目：主项目方块组 */
-function project(s: Stage) {
-  for (const [x, y] of [
-    [2, 4],
-    [3, 4],
-    [2, 5],
-    [3, 5],
-    [2, 6],
-    [3, 6],
-  ])
-    s.set(x, y, 'code');
-  if (!s.find('lbl-main')) chip(s, '主项目', 1.6, 7.3, 'lbl-main dim');
+/** 三层依赖：商店玩法 → 经济组件 → QuMod。文字放在节点右侧。 */
+function dependencyNode(s: Stage, row: number, name: string) {
+  for (const x of [7, 8]) s.set(x, row, 'code');
+  chip(s, name, 10, row + 0.1, `dim dep-label-${row}`);
 }
 
-async function dep(s: Stage, x: number, name: string, cls: string) {
-  for (let y = 0; y <= 5; y++) {
-    if (y > 0) s.set(x, y - 1, 'empty');
-    s.set(x, y, 'code');
-    await s.wait(55);
-  }
-  s.set(x, 6, 'code');
-  s.put(`pipe ${cls}`, 4, 5.4, '', x - 4, 0.2);
-  chip(s, name, x - 0.6, 7.3, `${cls} dim`);
+async function dependencyLink(s: Stage, row: number, name: string) {
+  // 先画连线，再出现对应节点；已有节点保留原位。
+  s.put('pipe vertical', 7.9, row - 2, '', 0.2, 2);
+  chip(s, '依赖', 9, row - 1.6, 'dim');
+  await s.wait(550);
+  dependencyNode(s, row, name);
+  await s.wait(400);
 }
 
 export const scenes: Record<Scene, (s: Stage) => Promise<void>> = {
@@ -207,34 +217,41 @@ export const scenes: Record<Scene, (s: Stage) => Promise<void>> = {
     s.pulse(p);
   },
 
+  async project(s) {
+    dependencyNode(s, 1, '商店玩法');
+  },
+
   async add(s) {
-    project(s);
-    await s.wait(150);
-    await dep(s, 7, 'QuMod', 'p1');
+    await dependencyLink(s, 4, '经济组件');
+  },
+
+  async resolve(s) {
+    await dependencyLink(s, 7, 'QuMod');
   },
 
   async lock(s) {
-    await dep(s, 11, 'shared', 'p2');
-    s.put('lock', 11.6, 4.1, '');
-    chip(s, 'SHA', 12.2, 3.2, 'dim');
+    chip(s, '固定提交', 0.6, 4.1, 'dim');
+    for (const row of [4, 7]) {
+      s.put('lock', 5.5, row + 0.1, '');
+      await s.wait(400);
+    }
   },
 
   async sync(s) {
-    for (const x of [7, 11]) for (let y = 0; y <= 6; y++) s.set(x, y, 'empty');
-    s.layer.querySelectorAll('.pipe').forEach((e) => e.classList.add('off'));
-    const cache = s.put('cache', 8, 0.2, '缓存', 3, 1);
-    await s.wait(500);
-    s.layer.querySelectorAll('.pipe').forEach((e) => e.remove());
-    s.layer.querySelectorAll('.chip.p1, .chip.p2').forEach((e) => e.remove());
-    s.layer.querySelectorAll('.lock').forEach((e) => e.classList.add('settle'));
-    await Promise.all([dep(s, 7, 'QuMod', 'p1'), dep(s, 11, 'shared', 'p2')]);
+    const cache = s.put('cache', 0.6, 0.4, '队友同步', 4, 1);
+    for (const row of [1, 4, 7]) {
+      const label = s.find(`dep-label-${row}`);
+      if (label) s.pulse(label);
+      for (const x of [7, 8]) s.set(x, row, 'seam');
+      await s.wait(300);
+      for (const x of [7, 8]) s.set(x, row, 'code');
+    }
     s.pulse(cache);
   },
 
   async zip(s) {
-    const cols = [2, 3, 7, 11];
-    for (const x of cols)
-      for (let y = 4; y <= 6; y++) {
+    for (const x of [7, 8])
+      for (const y of [1, 4, 7]) {
         if (s.get(x, y) === 'code') s.set(x, y, 'seam');
       }
     await s.wait(300);
@@ -257,7 +274,7 @@ export const scenes: Record<Scene, (s: Stage) => Promise<void>> = {
       chip(s, names[i], 0.6 + (i % 2) * 7.6, 1 + Math.floor(i / 2) * 1.6, 'hook');
       await s.wait(160);
     }
-    chip(s, '0.5.0+ · before_archive 0.5.3+', 0.6, 4.6, 'dim');
+    chip(s, '串行执行 · 失败即中断', 0.6, 4.6, 'dim');
   },
 
   async hook(s) {
@@ -305,11 +322,4 @@ export const scenes: Record<Scene, (s: Stage) => Promise<void>> = {
     chip(s, 'connection_verified=true', 4.2, 7.4, 'ok');
   },
 
-  async twin(s) {
-    s.put('win', 0.2, 0.2, '<em>Windows</em>', 7.4, 8.6);
-    s.put('win', 8.4, 0.2, '<em>Apple Silicon macOS</em>', 7.4, 8.6);
-    await Promise.all([buildGround(s, 1, 6), buildGround(s, 9, 14)]);
-    s.put('player', 3, GROUND - 2, '<b></b><b></b><b></b>', 1, 2);
-    s.put('player', 11, GROUND - 2, '<b></b><b></b><b></b>', 1, 2);
-  },
 };

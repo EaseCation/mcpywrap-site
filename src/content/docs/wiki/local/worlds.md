@@ -5,8 +5,6 @@ sidebar:
   order: 1
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 本地世界是在本机运行游戏、加载当前项目 Addon 的测试世界，Windows 和 macOS 使用同一套命令。本页覆盖单人世界的启动、找回、代码更新、世界设置和停止。两名玩家联调见 [双客户端](/wiki/network/dual-clients/)，连接外部服务器见 [连接服务器](/wiki/network/server/)。
 
 ## 快速上手

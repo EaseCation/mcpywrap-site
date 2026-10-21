@@ -5,8 +5,6 @@ sidebar:
   order: 2
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 双客户端用于在 Windows 或 Apple Silicon macOS 本机联调两名玩家。两个客户端组成一个"组"，可以统一查询状态、看日志、热更代码和停止。
 
 动手前先确认已安装的 CLI 真的支持：查看 `doctor --capabilities` 和命令帮助里是否有 `--clients`、`--group`。不要只凭文档或 Skill 版本推断。

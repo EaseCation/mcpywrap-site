@@ -5,8 +5,6 @@ sidebar:
   order: 1
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 mcpywrap 提供 `mcpy` 命令，用于管理《我的世界》中国版 Addon 和地图项目。本页说明如何安装、确认命令可用，以及在需要时检查游戏引擎和功能支持情况。
 
 ## 环境要求
@@ -75,12 +73,12 @@ macOS 首次 `run` 可以自动准备资源；安装、版本固定和升级见 
 
 ```sh
 mcpy --local doctor --mcs-download-path <下载目录> --json
-mcpy --local --project <项目> --non-interactive run --engine-version 3.10.0.420447 --no-gui --detach --json
+mcpy --local --project <项目> --non-interactive run --engine-version <引擎版本号> --no-gui --detach --json
 ```
 
 需要直接指定游戏 EXE 时使用 `--game-executable <路径>`。注意：
 
-- 完整版本号必须真实存在，`3.10` 不是通配符。
+- 必须填写真实存在的完整引擎版本号，不能用简写匹配一系列版本。
 - 独立 EXE 仍需要资源目录与用户数据。
 - EXE 不在标准版本目录时，还需明确 `engine_version`；该声明不会验证二进制内部版本。
 - 不要同时指向两套不同的标准安装。

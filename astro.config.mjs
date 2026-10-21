@@ -4,14 +4,22 @@ import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
 
 export default defineConfig({
+  site: 'https://mcpy.easecation.net',
+  trailingSlash: 'always',
   output: 'static',
+  vite: {
+    optimizeDeps: {
+      // 3D 岛包含延迟加载；启动时一并预构建，避免重启后引用过期的依赖 URL。
+      include: ['three', '@react-three/fiber'],
+    },
+  },
   integrations: [
     starlight({
       title: 'mcpywrap',
       description: '用 Python 标准项目与依赖管理方式开发《我的世界》中国版 Mod 和资源包。',
       defaultLocale: 'root',
       locales: { root: { label: '简体中文', lang: 'zh-CN' } },
-      logo: { src: './src/assets/mcpy-icon.svg', alt: 'mcpywrap' },
+      logo: { src: './src/assets/mcpy-mark.svg', alt: 'mcpywrap' },
       favicon: '/favicon.svg',
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/EaseCation/mcpywrap' }],
       customCss: ['./src/styles/tokens.css', './src/styles/starlight.css'],

@@ -34,7 +34,7 @@ export const capabilities: Capability[] = [
     id: 'scripts',
     name: '生命周期脚本',
     side: 'dev',
-    summary: '构建、打包、启动前自动运行项目自己的资源生成脚本（0.5.0+）。', // 2.4
+    summary: '构建、打包、启动前自动运行项目自己的资源生成脚本。', // 2.4
     command: 'mcpy script list',
     href: '#scripts',
   },
@@ -92,7 +92,7 @@ export const capabilities: Capability[] = [
     id: 'clients',
     name: '双客户端',
     side: 'play',
-    summary: '两名玩家进入同一世界，验证多人同步（0.5.0+）。', // 2.11
+    summary: '两名玩家进入同一世界，验证多人同步。', // 2.11
     command: 'mcpy connect <host> --port 19132 --clients 2',
     href: '#server',
   },

@@ -1,0 +1,21 @@
+{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Federated": [
+          "acs:ram::1083406401917880:oidc-provider/github-actions"
+        ]
+      },
+      "Condition": {
+        "StringEquals": {
+          "oidc:iss": "https://token.actions.githubusercontent.com",
+          "oidc:aud": "sts.aliyuncs.com",
+          "oidc:sub": "repo:EaseCation@20168691/mcpywrap-site@1427791731:ref:refs/heads/main"
+        }
+      }
+    }
+  ]
+}

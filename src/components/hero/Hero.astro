@@ -5,7 +5,7 @@ import StaticPlanet from './StaticPlanet.astro';
 import Planet from './Planet';
 import { capabilities } from '../../data/capabilities';
 
-const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'v0.5.4'];
+const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'MIT 开源'];
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -24,12 +24,12 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'v0.5.4'];
     </p>
     <InstallBox />
     <div class="links">
-      <a class="btn primary pixel" href="#start">交给 AI</a>
-      <a class="btn pixel" href="https://github.com/EaseCation/mcpywrap">GitHub</a>
-      <a class="btn pixel" href="/wiki/">阅读 Wiki</a>
+      <a class="btn primary pixel" href="#start"><span>快速开始</span></a>
+      <a class="btn pixel" href="https://github.com/EaseCation/mcpywrap"><span>GitHub</span></a>
+      <a class="btn pixel" href="/wiki/"><span>阅读 Wiki</span></a>
     </div>
     <ul class="tags" aria-label="支持平台与版本">
-      {tags.map((t) => <li class="pixel">{t}</li>)}
+      {tags.map((t) => <li class="pixel"><span>{t}</span></li>)}
     </ul>
   </div>
 
@@ -102,8 +102,13 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'v0.5.4'];
     margin: 20px 0 24px;
   }
   .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
     font-size: var(--px-12);
-    padding: 10px 16px 8px;
+    line-height: 1;
+    padding: 10px 16px;
     color: var(--c-text);
     background: var(--c-bg-2);
     box-shadow: var(--bevel);
@@ -115,6 +120,9 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'v0.5.4'];
   .btn.primary {
     background: var(--c-mint);
     color: var(--c-void);
+    box-shadow:
+      inset calc(var(--u) * -1) calc(var(--u) * -1) 0 0 rgb(0 0 0 / 0.25),
+      inset var(--u) var(--u) 0 0 rgb(255 255 255 / 0.45);
   }
   .btn.primary:hover {
     background: var(--c-acid);
@@ -129,10 +137,20 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'v0.5.4'];
     padding: 0;
   }
   .tags li {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
     font-size: var(--px-12);
-    padding: 4px 8px 2px;
+    line-height: 1;
+    padding: 4px 8px;
     border: 2px solid var(--c-line);
     color: var(--c-text-dim);
+  }
+  /* 像素字体的字形视觉重心偏低，单独校正文字，边框与点击区域保持原位。 */
+  .btn > span,
+  .tags li > span {
+    transform: translateY(-1px);
   }
 
   .hero-stage {

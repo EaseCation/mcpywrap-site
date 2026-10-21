@@ -5,8 +5,6 @@ sidebar:
   order: 3
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 远程执行让游戏跑在一台 Windows 上，而命令从另一台机器（例如 macOS 开发机）发出。Windows 端运行 `mcpy serve` 提供 HTTP 服务，调用端用 `--remote <endpoint>` 路由命令。
 
 如果只是在本机连接游戏服务器，不需要本页，直接看 [连接服务器](/wiki/network/server/)。
@@ -73,7 +71,7 @@ Git 或可编辑安装可能缺少 CI 生成的原生组件，按 `doctor` 的�
 调用端不需要运行 Windows 游戏，也不会用本机桌面操作代替远端。跨机命令不需要打开 Qt。
 
 ```sh
-uv run --no-project --python 3.12 "<skill>/scripts/bootstrap.py" --remote http://192.168.1.20:18765 --require-capability remote-client --require-capability network-sessions --require-capability py
+uv run --no-project --python <Python版本或解释器路径> "<skill>/scripts/bootstrap.py" --remote http://192.168.1.20:18765 --require-capability remote-client --require-capability network-sessions --require-capability py
 mcpy --remote http://192.168.1.20:18765 --non-interactive doctor --capabilities --json
 ```
 

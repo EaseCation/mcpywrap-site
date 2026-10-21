@@ -1,0 +1,33 @@
+---
+import capture from '../assets/captures/macos-weapon-demo.png';
+---
+
+<figure class="macos-capture" style={`--capture-width: ${capture.width / 2}px`}>
+  <img
+    src={capture.src}
+    width={capture.width}
+    height={capture.height}
+    alt="Apple Silicon Mac 上的游戏实机画面：自然生成的雪山与针叶林中，玩家以第一人称持枪；保留 macOS 窗口标题栏、红绿灯和原生阴影。"
+    loading="lazy"
+    decoding="async"
+  />
+  <figcaption>Apple Silicon macOS 实机画面</figcaption>
+</figure>
+
+<style>
+  .macos-capture {
+    max-width: var(--capture-width);
+    margin: -24px auto 0;
+  }
+  .macos-capture :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  figcaption {
+    margin-top: -4%;
+    color: var(--c-text-dim);
+    font-size: 13px;
+    text-align: center;
+  }
+</style>

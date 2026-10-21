@@ -1,0 +1,40 @@
+{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ram:CreateRole",
+        "ram:GetRole"
+      ],
+      "Resource": "acs:ram:*:1083406401917880:role/gh-oidc-mcpywrap-site-deploy"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ram:CreatePolicy",
+        "ram:GetPolicy",
+        "ram:GetPolicyVersion"
+      ],
+      "Resource": "acs:ram:*:1083406401917880:policy/McpywrapSiteDeploy"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "ram:AttachPolicyToRole",
+      "Resource": [
+        "acs:ram:*:1083406401917880:role/gh-oidc-mcpywrap-site-deploy",
+        "acs:ram:*:1083406401917880:policy/McpywrapSiteDeploy"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ram:GetPolicy",
+        "ram:GetPolicyVersion",
+        "ram:CreatePolicyVersion",
+        "ram:SetDefaultPolicyVersion"
+      ],
+      "Resource": "acs:ram:*:1083406401917880:policy/SslCenterCertRenewOidcPolicy"
+    }
+  ]
+}

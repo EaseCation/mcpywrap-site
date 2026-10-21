@@ -5,8 +5,6 @@ sidebar:
   order: 1
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 `mcpy connect` 让开发客户端直接进入一台外部游戏服务器，用来调试服务器上的玩法，而不是创建本地世界。如果你在开发 Nukkit 这类基岩版服务端，可以用它快速拉起客户端进服、跑客户端 Python 探针、抓日志，测完再一键结束。
 
 :::note
@@ -61,7 +59,7 @@ mcpy --local --project <项目> --non-interactive run --no-gui --detach --json
 | Apple Silicon macOS | 只能连接允许无认证开发客户端的服务器；运行包须支持网络协议，见 [macOS 平台](/wiki/local/macos/) |
 | 两个本机客户端 | 见 [双客户端](/wiki/network/dual-clients/)，不能靠复制单会话参数或同一账号来模拟多玩家 |
 
-macOS 需要运行包 0.4.3 及以上，且 `network_connect_protocol=1`。0.4.3 曾在 macOS 26.6.2 / APK 3.10.100.299889 上，通过本机 Nemisys + SynapseAPI + Nukkit 测试栈验证了 connect、项目 run、Python 与失败清理；这次验证不包含 MCS/MPay 登录、外部 HTTP 资源包或新版统一输入，也不能推及公开服务器。
+macOS 的实例运行包需要支持 `network_connect_protocol=1`。mcpywrap 曾在 macOS 上通过本机 Nemisys + SynapseAPI + Nukkit 测试栈验证 connect、项目 run、Python 与失败清理（具体环境见 [更新记录](https://github.com/EaseCation/mcpywrap/blob/main/CHANGELOG.md)）；这次验证不包含 MCS/MPay 登录、外部 HTTP 资源包或统一输入，也不能推及公开服务器。
 
 :::caution
 公开服务器是否接受开发客户端，取决于它自己的认证和协议。工具启动成功不代表服务器会放行。当前网络运行包的外部 HTTP 资源包下载尚未完成验收，需要这类分发时不能视为完整支持。

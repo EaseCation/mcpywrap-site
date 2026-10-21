@@ -5,8 +5,6 @@ sidebar:
   order: 1
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 游戏会话运行起来以后，可以直接在客户端或服务端执行 Python，热更已加载的模块，或重载 JSON UI 等资源，不必重开世界。本页从一个已经存在的 session 开始；启动和找回会话见 [本地世界](/wiki/local/worlds/)。
 
 ## 快速上手
@@ -111,7 +109,7 @@ Python 热更的规则：
 
 - JSON UI 返回 `triggered` / `effect_verified=false` 表示请求已投递。请重新打开界面，按 Mod 的正常逻辑创建控件并绑定回调，再检查实际文字和画面。旧节点句柄可能失效。
 - 当前 macOS 开发包不会因该重载触发 `UiInitFinished`。不要全局伪造事件，也不要把调试用的 `_mcpy_launcher` 当作业务 API。新资源和复杂继承仍可能需要重开世界。
-- Windows 3.9.0.401155 / 3.10.0.420447 的 Shader 重载被禁用，Material 没有对应接口。macOS 的协议和版本差异见 [macOS 平台](/wiki/local/macos/)。
+- Windows 部分引擎版本禁用了 Shader 重载，Material 没有对应接口；以 `runtime capabilities` 的返回为准。macOS 的协议和版本差异见 [macOS 平台](/wiki/local/macos/)。
 - 组资源热更目前明确拒绝；主机文件更新不等于客机下载缓存已更新，详见 [双客户端](/wiki/network/dual-clients/)。
 
 ## 什么时候改用重载世界

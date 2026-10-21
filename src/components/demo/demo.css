@@ -49,6 +49,21 @@
   color: var(--c-acid);
   font-weight: normal;
 }
+.term .command-slot {
+  display: grid;
+}
+.term .command-slot > span {
+  grid-area: 1 / 1;
+}
+.term .command-reserve {
+  visibility: hidden;
+}
+.term .phase:not([hidden]) {
+  display: block;
+  margin-top: 6px;
+  font: 12px/1.5 var(--f-body);
+  color: var(--c-text-dim);
+}
 .term .cur {
   display: inline-block;
   width: 8px;
@@ -119,7 +134,8 @@
   inset: 0;
   pointer-events: none;
 }
-.cdemo .stage .o {
+/* 位置和默认格子尺寸保持低优先级，让文字标签与图形各自决定尺寸。 */
+.cdemo .stage :where(.o) {
   position: absolute;
   left: calc(var(--x) / var(--cols) * 100%);
   top: calc(var(--y) / var(--rows) * 100%);
@@ -128,6 +144,7 @@
   transition: left 0.24s steps(4), top 0.24s steps(4), opacity 0.3s;
   font-family: var(--f-pixel);
   font-size: var(--px-12);
+  line-height: 1.25;
   -webkit-font-smoothing: none;
   animation: cd-in 0.25s steps(3);
 }
@@ -172,8 +189,9 @@
 }
 
 .o.chip {
-  width: auto;
+  width: max-content;
   height: auto;
+  max-width: calc((var(--cols) - var(--x)) / var(--cols) * 100%);
   white-space: nowrap;
   padding: 3px 6px 1px;
   color: var(--c-void);
@@ -211,7 +229,9 @@
 }
 .o.hud {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  height: auto;
+  min-height: calc(var(--h) / var(--rows) * 100%);
   gap: 4px;
   padding: 6px;
   background: rgb(7 13 21 / 0.85);
@@ -229,7 +249,8 @@
   display: grid;
   place-items: center;
   color: var(--c-prompt);
-  font-size: var(--px-24);
+  font-size: var(--px-12);
+  line-height: 1;
 }
 .o.keys {
   display: flex;
@@ -274,6 +295,51 @@
   top: calc(var(--y) / var(--rows) * 100%);
   background: repeating-linear-gradient(90deg, var(--c-teal) 0 8px, transparent 8px 12px);
 }
+.cdemo .stage .grid {
+  z-index: 1;
+}
+.cdemo .stage .o {
+  z-index: 2;
+}
+.cdemo .stage .o.pipe {
+  z-index: 0;
+}
+.cdemo[data-demo='deps'] .stage .o {
+  transition: left 0.4s ease, top 0.4s ease, opacity 0.3s ease;
+  animation: cd-in 0.35s ease;
+}
+.cdemo[data-demo='deps'] .stage .o.pipe {
+  animation: cd-connect 0.55s ease both;
+}
+.cdemo[data-demo='deps'] .stage .o.pulse {
+  animation: cd-pulse 0.5s ease;
+}
+@keyframes cd-connect {
+  from {
+    clip-path: inset(0 0 100%);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+.cdemo .stage[data-instant] *,
+.cdemo .stage[data-instant] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+.o.pipe.vertical {
+  background: repeating-linear-gradient(180deg, var(--c-mint) 0 8px, transparent 8px 12px);
+}
+.o.pipe.vertical::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid var(--c-mint);
+}
 .o.pipe.p2 {
   background: repeating-linear-gradient(90deg, var(--c-mint) 0 8px, transparent 8px 12px);
 }
@@ -290,6 +356,7 @@
 .o.cache {
   display: grid;
   place-items: center;
+  min-height: 24px;
   color: var(--c-prompt);
   background: rgb(36 56 73 / 0.9);
   box-shadow: var(--bevel), 0 0 0 2px var(--c-teal);
@@ -308,16 +375,18 @@
   display: grid;
   place-items: center;
   font-size: var(--px-36);
+  line-height: 1;
   color: var(--c-void);
   background:
     repeating-linear-gradient(180deg, var(--c-void) 0 6px, transparent 6px 12px) 12% 0 / 8% 100% no-repeat,
     var(--c-acid);
-  padding-left: 14%;
+  padding-left: 0.4em;
   box-shadow: var(--bevel), 0 0 24px rgb(125 255 106 / 0.5);
 }
 .o.tl {
   display: grid;
   place-items: center;
+  min-height: 24px;
   color: var(--c-text-dim);
   border-bottom: 3px solid var(--c-line);
 }
@@ -368,6 +437,8 @@
   justify-content: center;
   align-items: center;
   gap: 2px;
+  min-height: 44px;
+  line-height: 1;
   color: var(--c-text-dim);
   background: #0e1a28;
   box-shadow: inset 0 0 0 2px var(--c-teal);

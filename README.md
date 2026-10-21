@@ -23,7 +23,7 @@ pnpm check      # 类型检查
 | `src/components/demo/` | 命令演示组件（终端 + 方块舞台）；脚本数据在 `src/data/demos.ts` |
 | `src/data/capabilities.ts` | 星球能力徽章 |
 | `src/content/docs/wiki/` | Wiki 正文（Markdown） |
-| `src/assets/captures/` | 实机截图与采集记录 `CAPTURES.md` |
+| `src/assets/captures/` | 首页 macOS 实机截图与来源记录 |
 | `src/styles/tokens.css` | 设计令牌（颜色取自 mcpy 图标）与像素字体 |
 | `fonts-src/` | Fusion Pixel 原始字体与授权；`scripts/subset-font.mjs` 生成 `public/fonts/` |
 
@@ -31,11 +31,14 @@ pnpm check      # 类型检查
 
 官网所有能力描述必须能在 mcpywrap 源码或文档中查证。事实清单、红线与出处对照维护在 `plan/`（不进 Git）。修改首页文案后同步更新对照表；新增汉字后 `pnpm build` 会自动重新裁剪字体。
 
+首页和 Wiki 不标注 mcpywrap、运行包或开发包的具体发布版本，也不承诺文档始终对应最新版本。命令与能力以实际安装的 CLI 帮助和能力查询为准，版本变化链接到上游更新记录。示例使用版本占位符；必要的最低环境要求、协议字段、许可证版本和内部实测记录保留。
+
 ## 3D 星球
 
 - `?seam=line` / `?seam=s` 切换直线或太极 S 形交界线（默认 S 形）。
 - 拖动旋转（带惯性），Ctrl/⌘ + 滚轮或触控板捏合缩放；普通滚轮保留给页面滚动。
 - 鼠标划过星球时，光标附近的方块翻到另一种状态（透视镜）。
+- 点击方块（不拖动）：从点击处扩散一圈翻面波纹，并在点击处浮起该区域的一条真实命令（`src/components/hero/planet/commands.ts`）。
 - 点击徽章转到正面并展开能力卡片，Esc 关闭。
 - WebGL 不可用或渲染出错时保留静态 SVG 星球与 DOM 徽章导航；离开视口自动停帧。
 
@@ -55,4 +58,6 @@ pnpm shots [路径...]          # 桌面 / 移动截图到 shots/
 
 ## 部署
 
-`pnpm build` 产物 `dist/` 为纯静态文件，可直接上传到对象存储 + CDN。目前未部署。
+正式地址：[mcpy.easecation.net](https://mcpy.easecation.net)。`pnpm build` 产物 `dist/` 通过私有阿里云 OSS + CDN 提供服务。
+
+部署工作流、GitHub OIDC、证书续期、目录 URL 重写与 404 配置见 [部署说明](deploy/README.md)。

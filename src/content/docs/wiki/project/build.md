@@ -5,8 +5,6 @@ sidebar:
   order: 1
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 `build`、`package`、`dev` 把项目和依赖组装成离线产物。它们都在调用端执行，即使项目配置了 remote 也不会在服务端运行。
 
 ## 快速上手

@@ -10,13 +10,19 @@ interface Props {
 const demo = demos[Astro.props.id];
 ---
 
-<div class="cdemo" data-demo={demo.id} data-steps={JSON.stringify(demo.steps.map((s) => ({ show: s.show, scene: s.scene, fields: s.fields })))}>
+<div class="cdemo" data-demo={demo.id} data-steps={JSON.stringify(demo.steps.map((s) => ({ tab: s.tab, show: s.show, phase: s.phase, hold: s.hold, scene: s.scene, fields: s.fields })))}>
   <div class="screen" aria-hidden="true">
     <div class="bar pixel">
       <span class="dots"><i></i><i></i><i></i></span>
       <span>{demo.title}</span>
     </div>
-    <div class="term"><span class="line"><b>$</b> <span data-typed></span><span class="cur"></span></span></div>
+    <div class="term">
+      <div class="command-slot">
+        <span class="command-reserve" data-reserve></span>
+        <span class="line" data-command-line><b>$</b> <span data-typed></span><span class="cur"></span></span>
+      </div>
+      <span class="phase" data-phase hidden></span>
+    </div>
     <div class="stage" data-stage></div>
     <div class="fields" data-fields></div>
   </div>
@@ -32,7 +38,7 @@ const demo = demos[Astro.props.id];
             </button>
             <div class="detail">
               <p id={`${demo.id}-note-${i}`}>{s.note}</p>
-              <div class="cmd">
+              {s.show && s.copy && <div class="cmd">
                 <code id={`${demo.id}-cmd-${i}`} tabindex="0">{s.show}</code>
                 <button
                   class="copy pixel"
@@ -43,7 +49,7 @@ const demo = demos[Astro.props.id];
                 >
                   <span data-copy-label>复制</span>
                 </button>
-              </div>
+              </div>}
             </div>
           </li>
         ))
@@ -70,7 +76,10 @@ const demo = demos[Astro.props.id];
   import type { Scene } from '../../data/demos';
 
   interface S {
-    show: string;
+    tab: string;
+    show?: string;
+    phase?: string;
+    hold?: number;
     scene: Scene;
     fields: string[];
   }
@@ -82,12 +91,21 @@ const demo = demos[Astro.props.id];
     const steps: S[] = JSON.parse(root.dataset.steps!);
     const stage = new Stage(root.querySelector('[data-stage]')!);
     const typed = root.querySelector<HTMLElement>('[data-typed]')!;
+    const commandLine = root.querySelector<HTMLElement>('[data-command-line]')!;
+    const phase = root.querySelector<HTMLElement>('[data-phase]')!;
+    const reserve = root.querySelector<HTMLElement>('[data-reserve]')!;
+    const hasPhases = steps.some((step) => step.phase);
+    // 为最长命令预留换行空间，打字和阶段切换时舞台不随终端高度跳动。
+    reserve.textContent = '$ ' + steps.reduce((longest, step) => (step.show?.length ?? 0) > longest.length ? step.show! : longest, '') + ' ▌';
     const fields = root.querySelector<HTMLElement>('[data-fields]')!;
     const items = [...root.querySelectorAll<HTMLElement>('[data-step]')];
     const toggle = root.querySelector<HTMLButtonElement>('[data-toggle]');
     let current = -1;
     let playing = false;
     let started = false;
+    let completed = -1;
+    let shownCommand = '';
+    let playVersion = 0;
     root.dataset.js = '';
 
     const mark = (i: number) => {
@@ -110,44 +128,71 @@ const demo = demos[Astro.props.id];
       );
     };
 
-    /** 显示第 i 步：前面各步瞬间完成，当前步按需播放动画 */
+    /** 顺序推进复用当前舞台；跳步时无动画还原先前状态。 */
     async function show(i: number, animate: boolean) {
-      stage.reset();
-      const token = stage.token;
+      const canContinue = i > 0 && completed === i - 1;
+      completed = -1;
+      stage.token++;
+      const run = stage.forRun(!animate);
+      root.dataset.state = 'rendering';
       mark(i);
-      fields.replaceChildren();
-      stage.instant = true;
-      for (let k = 0; k < i; k++) await scenes[steps[k].scene](stage);
-      stage.instant = !animate;
-      const cmd = steps[i].show;
-      if (animate) {
+      if (!canContinue) {
+        completed = -1;
+        stage.root.dataset.instant = '';
+        run.clear();
+        run.instant = true;
+        for (let k = 0; k < i; k++) {
+          await scenes[steps[k].scene](run);
+          run.checkpoint();
+        }
+        // 先提交还原后的样式，避免旧节点重新播放入场和位移动画。
+        void stage.root.offsetWidth;
+        run.checkpoint();
+        delete stage.root.dataset.instant;
+      }
+      run.instant = !animate;
+      const cmd = steps.slice(0, i + 1).reverse().find((step) => step.show)?.show ?? '';
+      commandLine.hidden = !cmd;
+      phase.hidden = !hasPhases;
+      phase.textContent = steps[i].phase ?? steps[i].tab;
+      showFields(steps[i]);
+      if (animate && cmd && cmd !== shownCommand) {
         typed.textContent = '';
         for (let c = 0; c < cmd.length; c++) {
+          run.checkpoint();
           typed.textContent = cmd.slice(0, c + 1);
-          await stage.wait(c < 5 ? 40 : 14);
+          await run.wait(c < 5 ? 40 : 14);
         }
-        await stage.wait(250);
+        await run.wait(250);
       } else typed.textContent = cmd;
-      await scenes[steps[i].scene](stage);
-      if (token === stage.token) showFields(steps[i]);
+      run.checkpoint();
+      shownCommand = cmd;
+      await scenes[steps[i].scene](run);
+      run.checkpoint();
+      completed = i;
+      root.dataset.state = 'complete';
     }
 
     async function play(from = 0) {
+      const version = ++playVersion;
       playing = true;
       if (toggle) toggle.textContent = '暂停';
       try {
         for (let i = from; i < steps.length; i++) {
-          await show(i, true);
-          await stage.wait(1500);
+          if (version !== playVersion) return;
+          await show(i, !reduced);
+          await stage.forRun(false).wait(steps[i].hold ?? 1500);
         }
       } catch {
-        return; // 被打断
+        return; // 被暂停、跳步或重播打断
       }
+      if (version !== playVersion) return;
       playing = false;
       if (toggle) toggle.textContent = '播放';
     }
 
     const stop = () => {
+      playVersion++;
       playing = false;
       stage.token++;
       if (toggle) toggle.textContent = '播放';
@@ -155,16 +200,20 @@ const demo = demos[Astro.props.id];
 
     root.querySelectorAll<HTMLButtonElement>('[data-go]').forEach((b) =>
       b.addEventListener('click', () => {
+        started = true;
         stop();
         show(Number(b.dataset.go), !reduced).catch(() => {});
       }),
     );
     toggle?.addEventListener('click', () => {
+      started = true;
       if (playing) stop();
-      else play(current >= steps.length - 1 || current < 0 ? 0 : current + 1);
+      else play(current < 0 || completed === steps.length - 1 ? 0 : completed === current ? current + 1 : current);
     });
     root.querySelector('[data-replay]')?.addEventListener('click', () => {
+      started = true;
       stop();
+      shownCommand = '';
       play(0);
     });
 

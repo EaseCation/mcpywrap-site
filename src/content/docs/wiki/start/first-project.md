@@ -5,8 +5,6 @@ sidebar:
   order: 2
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 mcpywrap 用 `pyproject.toml` 管理项目和开发侧依赖，并把构建、游戏测试和 MC Studio 编辑器串联起来。本页带你从一个目录开始，完成初始化、运行和打包。
 
 ## 快速上手

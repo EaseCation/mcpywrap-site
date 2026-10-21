@@ -1,4 +1,4 @@
-// 命令演示脚本。命令与返回字段均取自 mcpywrap 0.5.4 的 skills/mcpywrap/references（src 标注出处）。
+// 命令演示脚本。命令与返回字段均取自 mcpywrap 的 skills/mcpywrap/references（src 标注出处）。
 // show：终端里显示的简写；copy：复制按钮复制的完整命令。
 // fields：面板上亮起的真实标识（返回字段名、配置键或环境变量），不伪造值。
 export type Scene =
@@ -8,20 +8,24 @@ export type Scene =
   | 'shot'
   | 'py'
   | 'reload'
+  | 'project'
   | 'add'
+  | 'resolve'
   | 'lock'
   | 'sync'
   | 'zip'
   | 'hooks'
   | 'hook'
   | 'connect'
-  | 'group'
-  | 'twin';
+  | 'group';
 
 export interface Step {
   tab: string;
-  show: string;
-  copy: string;
+  /** 命令处理过程可以拆成多个阶段；后续阶段保留前一条命令。 */
+  show?: string;
+  copy?: string;
+  phase?: string;
+  hold?: number;
   note: string;
   fields: string[];
   scene: Scene;
@@ -99,58 +103,64 @@ export const demos: Record<string, Demo> = {
   },
   deps: {
     id: 'deps',
-    title: '依赖管理',
+    title: '示例：给商店玩法备齐前置',
     steps: [
       {
-        tab: 'QuMod',
-        show: 'mcpy add --qumod --json',
-        copy: 'mcpy --project <项目> --non-interactive add --qumod --json',
-        note: '一键接入 QuMod 框架并生成入口脚本；源码不进你的仓库。',
-        fields: ['dependency', 'rev', 'new_script'],
-        scene: 'add',
-        src: 'S:project-dependencies, D:qumod',
-      },
-      {
-        tab: 'Git 依赖',
-        show: 'mcpy add --git <URL> --ref <提交> --dep-name shared --json',
-        copy: 'mcpy --project <项目> --non-interactive add --git "<URL>" --ref "<提交或标签>" --dep-name shared --json',
-        note: '首次添加锁成完整提交 SHA；子依赖递归处理，冲突会被检测出来。',
-        fields: ['dependency', 'rev', 'kind', 'target'],
-        scene: 'lock',
+        tab: '商店玩法',
+        phase: '从正在开发的玩法项目开始',
+        note: '这是你的商店玩法项目，负责商品和购买流程。接下来为它加入提供金币功能的经济前置组件。',
+        fields: [],
+        scene: 'project',
+        hold: 2200,
         src: 'S:project-dependencies',
       },
       {
-        tab: '同步',
+        tab: '加入经济组件',
+        show: 'mcpy add --git <经济组件仓库URL> --dep-name economy --json',
+        copy: 'mcpy --project <项目> --non-interactive add --git "<经济组件仓库URL>" --dep-name economy --json',
+        phase: '添加操作 · 加入直接依赖',
+        note: '运行这条命令，把已有的经济组件加入商店项目。先看这一层关系：商店玩法依赖经济组件。',
+        fields: ['dependency', 'kind', 'target'],
+        scene: 'add',
+        hold: 2400,
+        src: 'S:project-dependencies',
+      },
+      {
+        tab: '解析 QuMod 前置',
+        phase: '同一次添加操作 · 继续解析子依赖',
+        note: '示例中的经济组件在配置中声明了 QuMod 依赖。mcpywrap 继续准备这一层前置，无需再手动执行一条添加命令。',
+        fields: ['dependency'],
+        scene: 'resolve',
+        hold: 2400,
+        src: 'S:project-dependencies',
+      },
+      {
+        tab: '固定依赖',
+        phase: '同一次添加操作 · 记录所用提交',
+        note: '将经济组件和 QuMod 所用的代码提交记录到依赖锁文件中，后续同步就能恢复同一套依赖。',
+        fields: ['rev'],
+        scene: 'lock',
+        hold: 2200,
+        src: 'S:project-dependencies',
+      },
+      {
+        tab: '队友同步',
         show: 'mcpy sync --json',
         copy: 'mcpy --project <项目> --non-interactive sync --json',
-        note: '团队成员克隆仓库后一条命令恢复全部依赖；下载有缓存，多项目共享。',
+        note: '队友拿到商店项目后运行 sync，就能恢复项目里声明的经济组件和 QuMod，不用逐个找仓库、下载和拷贝。',
         fields: ['synced'],
         scene: 'sync',
+        hold: 2200,
         src: 'S:project-dependencies',
       },
       {
-        tab: '打包',
+        tab: '一起打包',
         show: 'mcpy package --json',
         copy: 'mcpy --project <项目> --non-interactive package --json',
-        note: '主项目与依赖按规则合并资源，输出 dist/<name>-<version>.zip。',
+        note: '把商店玩法、经济组件和 QuMod 的代码与资源按规则组装成一个 ZIP，不用发布前再手动拼包。',
         fields: ['artifact'],
         scene: 'zip',
         src: 'S:project-workflow',
-      },
-    ],
-  },
-  macos: {
-    id: 'macos',
-    title: '同一条命令，两个平台',
-    steps: [
-      {
-        tab: 'Windows / macOS',
-        show: 'mcpy run --no-gui --detach --json',
-        copy: `${P} run --no-gui --detach --json`,
-        note: 'Windows 自动发现 MC Studio 引擎；Apple Silicon Mac 首次运行自动准备原生运行包。',
-        fields: ['session', 'world_ready'],
-        scene: 'twin',
-        src: 'S:macos-local, S:setup',
       },
     ],
   },

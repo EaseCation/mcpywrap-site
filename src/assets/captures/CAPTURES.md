@@ -1,21 +1,10 @@
-# 实机素材采集记录
+# 当前实机素材
 
-所有图片均为 `mcpy screenshot --background-only` 的原始输出，仅做尺寸压缩，未做任何修图。
+`macos-weapon-demo.png` 用于首页 macOS 区块，替换双平台示意动画。
 
-| 文件 | 平台 | 引擎 / 运行包 | 日期 | 采集方式 |
-|---|---|---|---|---|
-| macos-flat-before.png | macOS 26.6.2 · Apple Silicon | mcpy 0.5.2 · 开发包 3.9.100.297020 · 运行包 0.4.5 | 2026-10-21 | 见下方步骤 1–3 |
-| macos-flat-after.png | 同上 | 同上 | 2026-10-21 | 见下方步骤 4–6 |
-
-步骤（临时项目 `/tmp/mcpy-site-demo`，采集完已 stop 会话）：
-
-1. `mcpy init --name sitedemo --type addon` + `mcpy mod --name SiteDemo`
-2. `mcpy --local run --new --no-gui --detach --world-type flat --game-type creative --difficulty peaceful --seed 12345 --json` → `world_ready: true`
-3. `mcpy --local screenshot --session <sid> --background-only --output shot-world.png --json` → `capture: launcher-framebuffer`，1440×960
-4. `mcpy --local runtime install` 后 `runtime input observe` → `position [0.5, -60.0, 0.5]`，`yaw ≈ 0, pitch 0`
-5. `runtime input run --file plan.json`，计划为 `player.look yaw 35 pitch 12` + `player.move forward 1, 2500 ms` → `effect_verified: false`
-6. 再次 observe → `position [-5.69, -60.0, 9.34]`，`yaw 35.0, pitch 12.0`；随后截图 shot-moved.png
-
-另：`runtime py --side server --code "1 + 1"` 返回 `state: completed, value: 2`。
-
-待补（需要 Windows）：录屏、MCEditor、本地主客机双客户端。
+- 采集日期：2026-10-21。
+- 项目：`netease-addons/ec-weapon-demo`，通过本机 mcpywrap 启动。
+- 场景：新建无限世界，种子 `12345`，自然生成的雪山与针叶林，第一人称持枪。
+- 来源：用户手动截取的 macOS 窗口，最终指定文件 `codex-clipboard-18f198aa-ce7e-41d0-a1c2-a7ea650cbeb9.png`。
+- 原图：1664 × 1248，保留透明通道、原生窗口标题栏、红绿灯及阴影；按原始字节保存，不裁剪、不拼接、不重绘。
+- 网页：直接引用原始 PNG，不转为有损格式；桌面最大显示宽度为原图一半（832 CSS 像素），保留原生 2× 分辨率。窄屏按容器缩小，直接使用原图的窗口外框和阴影，不叠加模拟窗口。

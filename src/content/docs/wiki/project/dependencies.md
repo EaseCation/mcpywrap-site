@@ -5,8 +5,6 @@ sidebar:
   order: 2
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 mcpywrap 支持三类依赖：mcpy 工具环境里的 Python 包、本机已有的 Addon 目录，以及 Git 仓库。QuMod 是 Git 依赖的一个预设。
 
 ## 快速上手
@@ -26,7 +24,7 @@ mcpywrap 支持三类依赖：mcpy 工具环境里的 Python 包、本机已有�
 ## Python 包：只进工具环境
 
 ```sh
-mcpy add "package-name>=1.0"
+mcpy add package-name
 mcpy remove package-name
 ```
 
@@ -67,7 +65,7 @@ shared-addon/
 
 ```sh
 # 自动识别 Addon，或读取仓库的导出描述
-mcpy add --git https://example.com/team/shared-addon.git --ref v1.2.0
+mcpy add --git https://example.com/team/shared-addon.git --ref <标签或完整SHA>
 
 # 没有项目描述的纯源码目录：显式补充布局
 mcpy add --git https://example.com/team/shared-code.git --kind code --subdir src --target MyMod/SharedLib

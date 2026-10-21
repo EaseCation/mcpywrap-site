@@ -2,6 +2,8 @@ plan/
 node_modules/
 dist/
 .astro/
+.local/
+__pycache__/
 shots/
 .DS_Store
 scripts/_*.mjs

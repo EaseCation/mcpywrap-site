@@ -3,8 +3,6 @@ title: AI 接入
 description: 为 AI Agent 安装 mcpywrap Skill，让它通过公开 CLI 完成项目开发与验收。
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 mcpywrap 仓库自带一份完整的 Skill，供 AI Agent 操作 mcpywrap。Skill 告诉 Agent 按当前任务查阅哪一篇参考、如何调用 CLI，以及哪些结果不能当作验收证据。
 
 ## 快速上手
@@ -49,10 +47,10 @@ Skill 按当前任务选择参考，不要求 AI 通读产品文档，也不把�
 Skill 附带 bootstrap 脚本，用于首次接入、缺少命令、升级或切换机器：
 
 ```sh
-uv run --no-project --python 3.12 "<skill>/scripts/bootstrap.py"
+uv run --no-project --python <Python版本或解释器路径> "<skill>/scripts/bootstrap.py"
 ```
 
-Windows 也可以运行 `scripts/bootstrap.ps1`。bootstrap 返回的 `command` 属于本机，Agent 后续使用它。默认复用已有安装；明确更换来源时加 `--upgrade`，并选择 `--version`、`--git-ref <可获取的完整SHA>` 或 `--editable-path <本机源码目录>`。本地未推送的改动只能用本机源码安装。
+Python 需满足 [安装要求](/wiki/start/install/#环境要求)。Windows 也可以运行 `scripts/bootstrap.ps1`。bootstrap 返回的 `command` 属于本机，Agent 后续使用它。默认复用已有安装；明确更换来源时加 `--upgrade`，并选择 `--version <目标版本>`、`--git-ref <可获取的完整SHA>` 或 `--editable-path <本机源码目录>`。本地未推送的改动只能用本机源码安装。
 
 需要特定能力时可以要求 bootstrap 检查，例如 `--require-capability project-scripts`。已经确认命令和目标后，不必每次运行 bootstrap。
 

@@ -1,0 +1,10 @@
+{
+  "IndexDocument": {
+    "Suffix": "index.html",
+    "SupportSubDir": true
+  },
+  "ErrorDocument": {
+    "Key": "404.html",
+    "HttpStatus": "404"
+  }
+}

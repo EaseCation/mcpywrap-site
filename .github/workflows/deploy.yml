@@ -1,0 +1,61 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: mcpywrap-site-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build static site
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm check
+          pnpm build
+          pip install -r deploy/requirements.txt
+          python deploy/upload.py --dry-run
+      - name: Assume production deployment role
+        uses: aliyun/configure-aliyun-credentials-action@1e5248c8d5d93a8781ac344a68e19a43341e79e6
+        with:
+          role-to-assume: acs:ram::1083406401917880:role/gh-oidc-mcpywrap-site-deploy
+          oidc-provider-arn: acs:ram::1083406401917880:oidc-provider/github-actions
+          role-session-name: mcpy-site-${{ github.run_id }}
+          role-session-expiration: 3600
+          audience: sts.aliyuncs.com
+      - name: Upload static assets then HTML
+        run: python deploy/upload.py
+      - name: Refresh CDN directory cache
+        run: |
+          set -euo pipefail
+          curl -fsSL -o "$RUNNER_TEMP/aliyun-cli.tgz" https://aliyuncli.alicdn.com/aliyun-cli-linux-3.3.12-amd64.tgz
+          echo "88fb94ee39c2c2a61c5a791a41c9a556ce2f61eb5f1fc9124c78349719c85214  $RUNNER_TEMP/aliyun-cli.tgz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/aliyun-cli.tgz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/aliyun" configure set --mode StsToken --region cn-hangzhou \
+            --access-key-id "$ALIBABA_CLOUD_ACCESS_KEY_ID" \
+            --access-key-secret "$ALIBABA_CLOUD_ACCESS_KEY_SECRET" \
+            --sts-token "$ALIBABA_CLOUD_SECURITY_TOKEN"
+          "$RUNNER_TEMP/aliyun" cdn RefreshObjectCaches --ObjectPath https://mcpy.easecation.net/ --ObjectType Directory
+      - name: Verify HTTPS pages, rewrites and missing routes
+        run: python deploy/verify.py

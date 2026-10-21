@@ -5,8 +5,6 @@ sidebar:
   order: 3
 ---
 
-> 适用于 mcpywrap 0.5.4。
-
 mcpywrap 可以在不占用前台的情况下截取游戏画面，Windows 与 macOS 使用同一条命令。视频录制和逐帧提取只在 Windows 会话上可用，Mac 可以作为调用端通过远程使用。
 
 ## 快速上手
