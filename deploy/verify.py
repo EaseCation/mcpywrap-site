@@ -36,11 +36,17 @@ def main():
     args = parser.parse_args()
     base = args.base_url.rstrip('/')
     routes = {'/': 'index.html', '/wiki/': 'wiki/index.html', '/wiki': 'wiki/index.html'}
-    for path in ('start/install', 'start/first-project', 'start/vscode', 'local/gui',
+    for path in ('start/install', 'start/first-project', 'start/vscode', 'start/android', 'local/gui',
                  'local/worlds', 'local/macos', 'project/dependencies', 'runtime/debug', 'runtime/input'):
         for suffix in ('', '/'):
             routes[f'/wiki/{path}{suffix}'] = f'wiki/{path}/index.html'
     routes['/sitemap-index.xml'] = 'sitemap-index.xml'
+    android_html = (ROOT / 'wiki/start/android/index.html').read_text()
+    android_images = re.findall(r'<img[^>]+src="(/_astro/[^"?]+)"[^>]*>', android_html)
+    if 'astro:assets' in android_html or len([p for p in android_images if 'live-game' in p or 'test-controls' in p]) != 4:
+        raise SystemExit('Android guide must render four screenshots without raw component imports')
+    for path in android_images:
+        routes[path] = path.lstrip('/')
     html = (ROOT / 'index.html').read_text()
     assets = sorted(set(re.findall(r'(?:src|href)="(/_astro/[^"?]+)"', html)))
     for path in assets:

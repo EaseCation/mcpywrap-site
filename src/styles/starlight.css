@@ -46,3 +46,9 @@ h1#_top {
   border-radius: 0;
   color: var(--c-mint);
 }
+
+/* Keep portrait phone captures readable without filling the whole article width. */
+.sl-markdown-content img.android-guide-image {
+  display: block; width: 100%; max-width: 340px; height: auto; margin: 24px auto;
+  border: 1px solid var(--c-line); border-radius: 12px;
+}
