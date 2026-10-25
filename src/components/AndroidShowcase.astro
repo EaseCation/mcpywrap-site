@@ -1,4 +1,5 @@
 ---
+import overview from '../assets/captures/android/overview.jpg';
 import code from '../assets/captures/android/01-code-and-live-game.png';
 import logs from '../assets/captures/android/02-search-logs-and-live-game.png';
 import tools from '../assets/captures/android/03-tools-and-live-game.png';
@@ -21,13 +22,14 @@ const cards = [
     </div>
     <a class="android-download pixel" href="https://github.com/EaseCation/mcpywrap-android/releases/download/nightly/mcpywrap-android-nightly-arm64.apk"><span>下载 Android 预览版</span><span aria-hidden="true">↗</span></a>
   </div>
+  <a class="android-overview" href={overview.src} target="_blank" rel="noopener" aria-label="查看 Android 四张实机截图总览">
+    <img src={overview.src} width={overview.width} height={overview.height} alt="四张 mcpy Android 实机截图总览：源码编辑、日志搜索、外部工具协作和作品测试管理。" loading="lazy" decoding="async" />
+    <span class="overview-label pixel">四组实机画面 · 点击查看总览图 ↗</span>
+  </a>
   <div class="android-grid">
     {cards.map((card) => (
       <article class="android-card">
-        <a href={card.image.src} target="_blank" rel="noopener" aria-label={`查看原图：${card.title}`}>
-          <img src={card.image.src} width={card.image.width} height={card.image.height} alt={`mcpy Android 实机画面：${card.title}`} loading="lazy" decoding="async" />
-        </a>
-        <div class="android-card-copy"><p class="pixel">{card.label}</p><h4>{card.title}</h4><span>{card.text}</span></div>
+        <div class="android-card-copy"><p class="pixel">{card.label}</p><h4>{card.title}</h4><span>{card.text}</span><a class="android-original pixel" href={card.image.src} target="_blank" rel="noopener">查看对应原图 ↗</a></div>
       </article>
     ))}
   </div>
@@ -44,15 +46,17 @@ const cards = [
   .android-intro p:last-child { margin: 0; max-width: 680px; color: var(--c-text-dim); font-size: 14px; line-height: 1.8; }
   .android-download { display: inline-flex; flex: none; justify-content: space-between; gap: 32px; min-width: 220px; padding: 12px 16px 10px; color: var(--c-void); background: var(--c-mint); box-shadow: var(--bevel); text-decoration: none; font-size: var(--px-12); }
   .android-download:hover { background: var(--c-acid); }
+  .android-overview { position: relative; display: block; overflow: hidden; margin-bottom: 12px; border: 1px solid var(--c-line); background: #edf0f2; }
+  .android-overview img { display: block; width: 100%; height: auto; }
+  .overview-label { position: absolute; right: 12px; bottom: 12px; padding: 7px 10px 5px; color: var(--c-mint); background: rgb(7 13 21 / .86); font-size: 12px; }
   .android-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
   .android-card { min-width: 0; background: var(--c-bg-2); border: 1px solid var(--c-line); }
-  .android-card > a { display: block; overflow: hidden; background: #edf0f2; }
-  .android-card img { display: block; width: 100%; height: auto; transition: transform .2s steps(2); }
-  .android-card > a:hover img { transform: scale(1.03); }
   .android-card-copy { padding: 14px; }
   .android-card-copy p { margin: 0 0 8px; color: var(--c-mint); font-size: var(--px-12); }
   h4 { margin: 0 0 6px; color: var(--c-prompt); font-size: 17px; line-height: 1.5; font-weight: 600; }
   .android-card-copy span { display: block; color: var(--c-text-dim); font-size: 13px; line-height: 1.7; }
+  .android-original { display: inline-block; margin-top: 12px; color: var(--c-mint); font-size: 11px; text-decoration: none; }
+  .android-original:hover { color: var(--c-acid); }
   .android-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; color: var(--c-text-dim); font-size: 12px; }
   .android-facts span { padding: 5px 9px; border: 1px solid var(--c-line); }
   .android-facts .pixel { color: var(--c-mint); }
