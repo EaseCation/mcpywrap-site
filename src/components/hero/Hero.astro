@@ -8,7 +8,7 @@ import { capabilities } from '../../data/capabilities';
 const tags = ['Windows', 'Apple Silicon macOS', 'Android ARM64', 'MIT 开源'];
 ---
 
-<section class="hero" aria-labelledby="hero-title">
+<section class="hero" aria-labelledby="hero-title" data-active-platform="desktop">
   <!-- 3D 画布铺满整个 Hero（全宽），星球通过相机偏移对齐右侧舞台 -->
   <div class="hero-bg">
     <Planet client:only="react" capabilities={capabilities} />
@@ -55,9 +55,10 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Android ARM64', 'MIT 开源'];
 <script>
   document.querySelectorAll<HTMLElement>('[data-platform-switch]').forEach((switcher) => {
     const tabs = [...switcher.querySelectorAll<HTMLButtonElement>('[data-platform-tab]')];
-    const root = switcher.closest('.hero');
+    const root = switcher.closest<HTMLElement>('.hero');
     if (!root) return;
     const select = (platform: string) => {
+      root.dataset.activePlatform = platform;
       tabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.platformTab === platform)));
       root.querySelectorAll<HTMLElement>('[data-platform-panel]').forEach((panel) => {
         panel.hidden = panel.dataset.platformPanel !== platform;
@@ -126,20 +127,18 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Android ARM64', 'MIT 开源'];
   .platform-switch {
     display: inline-flex;
     margin: 0 0 10px;
-    border: 1px solid var(--c-line);
-    background: rgb(16 28 43 / .72);
+    border-bottom: 1px solid var(--c-line);
   }
   .platform-tab {
     border: 0;
-    border-right: 1px solid var(--c-line);
-    padding: 7px 14px 5px;
+    border-bottom: 2px solid transparent;
+    padding: 5px 14px 7px;
     color: var(--c-text-dim);
     background: transparent;
     font-size: var(--px-12);
     cursor: pointer;
   }
-  .platform-tab:last-child { border-right: 0; }
-  .platform-tab[aria-selected='true'] { color: var(--c-void); background: var(--c-mint); }
+  .platform-tab[aria-selected='true'] { color: var(--c-mint); border-bottom-color: var(--c-mint); }
   .platform-panel[hidden] { display: none; }
   .android-download {
     display: inline-flex;
@@ -155,6 +154,14 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Android ARM64', 'MIT 开源'];
   }
   .android-download:hover { background: var(--c-acid); }
   .android-note { max-width: 520px; margin: 10px 0 0; color: var(--c-text-dim); font-size: 13px; }
+  .hero[data-active-platform='android'] .btn.primary {
+    background: var(--c-bg-2);
+    color: var(--c-text);
+    box-shadow: var(--bevel);
+  }
+  .hero[data-active-platform='android'] .btn.primary:hover {
+    color: var(--c-acid);
+  }
   .links {
     display: flex;
     flex-wrap: wrap;
