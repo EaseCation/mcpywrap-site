@@ -16,6 +16,12 @@
 - 画面展示项目源码、原生脚本系统输出及世界/会话管理。截图本身不作为代码补全弹窗或运行时执行回执的证据。
 - 演示项目及隔离编辑器位于忽略的 `.local/vscode-showcase/`，不进入公开网站仓库。
 
+## mcpy Android
+
+- `android/01-code-and-live-game.png` 至 `04-projects-and-test-controls.png`：来自 `mcpy-android-web-handoff-20261025.zip` 的真实 Android 截图，展示源码编辑、日志搜索、外部工具协作及作品/测试实例管理。
+- 图片保留手机状态栏和右下角游戏画中画，网页仅等比缩放，不把画面重绘成产品 mockup。
+- 下载入口固定指向 GitHub Release 的 `nightly` APK；页面文案使用 Nightly 预发布、Android 11+、ARM64 和首次安装运行环境等交接包已核对信息。
+
 ## Wiki 图解（2026-10-21）
 
 `wiki/raw/` 保存实机原始采集。`src/data/wiki-captures.json` 记录裁剪范围、高亮区域与编号说明，`node scripts/annotate-captures.mjs` 生成 `public/wiki-images/` 下的无损 WebP。只裁剪和叠加编号框，不重绘控件、不伪造日志；点击文档中的图片可打开原分辨率标注图。

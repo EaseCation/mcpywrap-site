@@ -5,7 +5,7 @@ import StaticPlanet from './StaticPlanet.astro';
 import Planet from './Planet';
 import { capabilities } from '../../data/capabilities';
 
-const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'MIT 开源'];
+const tags = ['Windows', 'Apple Silicon macOS', 'Android ARM64', 'MIT 开源'];
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -22,7 +22,19 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'MIT 开源'];
       用 Python 标准项目与依赖管理方式开发《我的世界》中国版 Mod 和资源包。依赖、构建、打包、进游戏测试都是一条命令，AI
       Agent 也能自己搭环境、跑游戏、操作和截图验收。
     </p>
-    <InstallBox />
+    <div class="platform-switch" data-platform-switch role="tablist" aria-label="选择开发平台">
+      <button class="platform-tab pixel" type="button" role="tab" aria-selected="true" data-platform-tab="desktop">桌面端</button>
+      <button class="platform-tab pixel" type="button" role="tab" aria-selected="false" data-platform-tab="android">Android</button>
+    </div>
+    <div class="platform-panel" data-platform-panel="desktop">
+      <InstallBox />
+    </div>
+    <div class="platform-panel android-panel" data-platform-panel="android" hidden>
+      <a class="android-download pixel" href="https://github.com/EaseCation/mcpywrap-android/releases/download/nightly/mcpywrap-android-nightly-arm64.apk">
+        <span>下载 Android 预览版</span><span aria-hidden="true">↗</span>
+      </a>
+      <p class="android-note">Nightly · Android 11+ · ARM64；首次使用需在 App 内安装游戏运行环境。</p>
+    </div>
     <div class="links">
       <a class="btn primary pixel" href="#start"><span>快速开始</span></a>
       <a class="btn pixel" href="https://github.com/EaseCation/mcpywrap"><span>GitHub</span></a>
@@ -39,6 +51,22 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'MIT 开源'];
     </div>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-platform-switch]').forEach((switcher) => {
+    const tabs = [...switcher.querySelectorAll<HTMLButtonElement>('[data-platform-tab]')];
+    const root = switcher.closest('.hero');
+    if (!root) return;
+    const select = (platform: string) => {
+      tabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.platformTab === platform)));
+      root.querySelectorAll<HTMLElement>('[data-platform-panel]').forEach((panel) => {
+        panel.hidden = panel.dataset.platformPanel !== platform;
+      });
+    };
+    tabs.forEach((tab) => tab.addEventListener('click', () => select(tab.dataset.platformTab || 'desktop')));
+    if (/Android/i.test(navigator.userAgent)) select('android');
+  });
+</script>
 
 <style>
   .hero {
@@ -95,6 +123,38 @@ const tags = ['Windows', 'Apple Silicon macOS', 'Python 3.9+', 'MIT 开源'];
     color: var(--c-text);
     font-size: 17px;
   }
+  .platform-switch {
+    display: inline-flex;
+    margin: 0 0 10px;
+    border: 1px solid var(--c-line);
+    background: rgb(16 28 43 / .72);
+  }
+  .platform-tab {
+    border: 0;
+    border-right: 1px solid var(--c-line);
+    padding: 7px 14px 5px;
+    color: var(--c-text-dim);
+    background: transparent;
+    font-size: var(--px-12);
+    cursor: pointer;
+  }
+  .platform-tab:last-child { border-right: 0; }
+  .platform-tab[aria-selected='true'] { color: var(--c-void); background: var(--c-mint); }
+  .platform-panel[hidden] { display: none; }
+  .android-download {
+    display: inline-flex;
+    justify-content: space-between;
+    gap: 36px;
+    min-width: min(100%, 360px);
+    padding: 14px 18px 12px;
+    color: var(--c-void);
+    background: var(--c-mint);
+    box-shadow: var(--bevel);
+    text-decoration: none;
+    font-size: var(--px-12);
+  }
+  .android-download:hover { background: var(--c-acid); }
+  .android-note { max-width: 520px; margin: 10px 0 0; color: var(--c-text-dim); font-size: 13px; }
   .links {
     display: flex;
     flex-wrap: wrap;

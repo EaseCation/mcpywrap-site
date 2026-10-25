@@ -7,6 +7,7 @@ import CommandDemo from '../components/demo/CommandDemo.astro';
 import Code from '../components/Code.astro';
 import MacOSCapture from '../components/MacOSCapture.astro';
 import VSCodeShowcase from '../components/VSCodeShowcase.astro';
+import AndroidShowcase from '../components/AndroidShowcase.astro';
 import '../styles/sections.css';
 
 const pains = [
@@ -156,7 +157,14 @@ mcpy run`;
     <VSCodeShowcase />
   </Section>
 
-  <Section id="deps" index="04" kicker="依赖管理" title="像普通 Python 项目一样管理 Mod 依赖">
+  <Section id="android" index="04" kicker="Android 手机开发" title="在手机上写模组，看着游戏改代码" tone="seam">
+    <Fragment slot="lead">
+      <p>mcpy Android 是面向《我的世界》中国版模组开发的手机源码工作台：创建或导入作品，编辑 Python / JSON，构建并启动真实游戏测试。</p>
+    </Fragment>
+    <AndroidShowcase />
+  </Section>
+
+  <Section id="deps" index="05" kicker="依赖管理" title="像普通 Python 项目一样管理 Mod 依赖">
     <Fragment slot="lead">
       <p>
         在项目中声明需要的前置组件和开发框架，统一管理本地 Addon、Git 依赖和 QuMod。
@@ -177,7 +185,7 @@ mcpy run`;
     </div>
   </Section>
 
-  <Section id="macos" index="05" kicker="macOS 原生" title="Mac 上也能跑中国版 Addon 测试" tone="seam">
+  <Section id="macos" index="06" kicker="macOS 原生" title="Mac 上也能跑中国版 Addon 测试" tone="seam">
     <Fragment slot="lead">
       <p>
         ARM64 + Metal 原生运行：游戏直接运行在 Apple Silicon 上，使用 Metal 图形后端，无需 CPU 指令转译、Wine 或 Windows 虚拟机。
@@ -214,7 +222,7 @@ mcpy run`;
     </p>
   </Section>
 
-  <Section id="scripts" index="06" kicker="生命周期脚本" title="构建前，先把资源生成好">
+  <Section id="scripts" index="07" kicker="生命周期脚本" title="构建前，先把资源生成好">
     <Fragment slot="lead">
       <p>
         在构建、打包、启动前自动运行项目自己的生成器：策划表转 JSON、处理贴图、校验资源。脚本在宿主机运行，失败或超时会中断本次操作。
@@ -246,7 +254,7 @@ mcpy run`;
     </p>
   </Section>
 
-  <Section id="server" index="07" kicker="服务器联调" title="开发服务端时，让客户端自己连上来" tone="play">
+  <Section id="server" index="08" kicker="服务器联调" title="开发服务端时，让客户端自己连上来" tone="play">
     <Fragment slot="lead">
       <p>
         开发 Nukkit 等服务端时，用 <code>mcpy connect</code> 启动开发客户端连上指定服务器，再用同一套会话执行客户端 Python、统一输入和截图来验证服务端逻辑。
@@ -267,7 +275,7 @@ mcpy run`;
     </p>
   </Section>
 
-  <Section id="more" index="08" kicker="更多能力" title="日常开发用得上的其他命令">
+  <Section id="more" index="09" kicker="更多能力" title="日常开发用得上的其他命令">
     <ul class="cards">
       {
         cards.map((c) => (
@@ -281,7 +289,7 @@ mcpy run`;
     </ul>
   </Section>
 
-  <Section id="start" index="09" kicker="快速开始" title="四条命令进游戏，或者交给 AI" tone="seam">
+  <Section id="start" index="10" kicker="快速开始" title="四条命令进游戏，或者交给 AI" tone="seam">
     <div class="split">
       <div>
         <Code code={quick} lang="sh" title="在你的 Addon 目录里" copy />
@@ -310,7 +318,7 @@ mcpy run`;
     </div>
   </Section>
 
-  <Section id="trust" index="10" kicker="开源" title="MIT 开源，持续发布到 PyPI" tone="play">
+  <Section id="trust" index="11" kicker="开源" title="MIT 开源，持续发布到 PyPI" tone="play">
     <ul class="trust">
       <li><b class="pixel">MIT</b><span>EaseCation 开源维护</span></li>
       <li><b class="pixel">PyPI</b><span>GitHub Actions 可信发布</span></li>

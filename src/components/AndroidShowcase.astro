@@ -1,0 +1,61 @@
+---
+import code from '../assets/captures/android/01-code-and-live-game.png';
+import logs from '../assets/captures/android/02-search-logs-and-live-game.png';
+import tools from '../assets/captures/android/03-tools-and-live-game.png';
+import projects from '../assets/captures/android/04-projects-and-test-controls.png';
+
+const cards = [
+  { image: code, label: '直接改源码', title: '源码在手机上，游戏在小窗里', text: '编辑 Python / JSON 文件，保存后直接构建并测试；真实游戏画面留在画中画中，改一行就能看结果。' },
+  { image: logs, label: '实时调试', title: '搜索日志，对照运行中的游戏', text: '按客户端、服务端、游戏和引擎切换来源，搜索高亮并过滤匹配内容，代码和现象放在一起看。' },
+  { image: projects, label: '作品管理', title: '作品、实例和重新测试集中管理', text: '新建或导入作品，查看当前测试实例，保存退出、查看日志、重新测试都从作品入口完成。' },
+  { image: tools, label: '外部工具', title: '用你习惯的工具，运行同一份作品', text: '可搭配 Minis、Termux、编辑器或 AI Agent；外部工具编辑源码，mcpy Android 负责构建、启动和日志。' },
+];
+---
+
+<div class="android-showcase">
+  <div class="android-intro">
+    <div>
+      <p class="android-kicker pixel">手机本地开发工作台</p>
+      <h3>在安卓手机上，完成模组开发与测试</h3>
+      <p>创建作品、编辑源码、构建运行、查看日志。游戏显示在小窗里，开发界面继续可用；不用电脑，也能完成一次真实的修改与验证。</p>
+    </div>
+    <a class="android-download pixel" href="https://github.com/EaseCation/mcpywrap-android/releases/download/nightly/mcpywrap-android-nightly-arm64.apk"><span>下载 Android 预览版</span><span aria-hidden="true">↗</span></a>
+  </div>
+  <div class="android-grid">
+    {cards.map((card) => (
+      <article class="android-card">
+        <a href={card.image.src} target="_blank" rel="noopener" aria-label={`查看原图：${card.title}`}>
+          <img src={card.image.src} width={card.image.width} height={card.image.height} alt={`mcpy Android 实机画面：${card.title}`} loading="lazy" decoding="async" />
+        </a>
+        <div class="android-card-copy"><p class="pixel">{card.label}</p><h4>{card.title}</h4><span>{card.text}</span></div>
+      </article>
+    ))}
+  </div>
+  <div class="android-facts">
+    <span class="pixel">Android 11+</span><span class="pixel">ARM64</span><span class="pixel">Nightly 预发布</span><span>首次使用需在 App 内安装游戏运行环境</span>
+  </div>
+</div>
+
+<style>
+  .android-showcase { padding: 24px; border: 1px solid var(--c-line); background: var(--c-bg-1); box-shadow: var(--bevel); }
+  .android-intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding: 4px 4px 28px; }
+  .android-kicker { margin: 0 0 10px; color: var(--c-mint); font-size: var(--px-12); }
+  h3 { margin: 0 0 8px; color: var(--c-prompt); font-size: 28px; line-height: 1.4; font-weight: normal; }
+  .android-intro p:last-child { margin: 0; max-width: 680px; color: var(--c-text-dim); font-size: 14px; line-height: 1.8; }
+  .android-download { display: inline-flex; flex: none; justify-content: space-between; gap: 32px; min-width: 220px; padding: 12px 16px 10px; color: var(--c-void); background: var(--c-mint); box-shadow: var(--bevel); text-decoration: none; font-size: var(--px-12); }
+  .android-download:hover { background: var(--c-acid); }
+  .android-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .android-card { min-width: 0; background: var(--c-bg-2); border: 1px solid var(--c-line); }
+  .android-card > a { display: block; overflow: hidden; background: #edf0f2; }
+  .android-card img { display: block; width: 100%; height: auto; transition: transform .2s steps(2); }
+  .android-card > a:hover img { transform: scale(1.03); }
+  .android-card-copy { padding: 14px; }
+  .android-card-copy p { margin: 0 0 8px; color: var(--c-mint); font-size: var(--px-12); }
+  h4 { margin: 0 0 6px; color: var(--c-prompt); font-size: 17px; line-height: 1.5; font-weight: 600; }
+  .android-card-copy span { display: block; color: var(--c-text-dim); font-size: 13px; line-height: 1.7; }
+  .android-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; color: var(--c-text-dim); font-size: 12px; }
+  .android-facts span { padding: 5px 9px; border: 1px solid var(--c-line); }
+  .android-facts .pixel { color: var(--c-mint); }
+  @media (max-width: 900px) { .android-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .android-intro { align-items: start; flex-direction: column; } }
+  @media (max-width: 520px) { .android-showcase { padding: 14px; } .android-grid { grid-template-columns: minmax(0, 1fr); } h3 { font-size: 23px; } .android-download { width: 100%; } }
+</style>
